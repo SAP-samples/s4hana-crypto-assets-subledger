@@ -1,4 +1,4 @@
-# Crypto Assets Subledger
+# S/4 HANA Crypto Assets Subledger
 
 This code sample in particular implements a sample S/4 HANA Financials Subledger with the capability to manage cryptocurrency assets.  
 

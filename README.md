@@ -22,8 +22,7 @@ For a more detailed description, please consult the project's [Wiki](https://git
 
 ## Download and Installation
 
-To Be Determined
-
+Clone repo into the ABAP Development Tools and follow the build instructions.
 
 ## Known Issues
 

@@ -1,21 +1,21 @@
-# S/4 HANA Crypto Assets Subledger
+[![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/s4hana-crypto-assets-subledger)](https://api.reuse.software/info/github.com/SAP-samples/s4hana-crypto-assets-subledger)
 
-This code sample in particular implements a sample S/4 HANA Financials Subledger with the capability to manage cryptocurrency assets.  
+# SAP S/4HANA Crypto Assets Subledger
+
+This code sample in particular implements a sample SAP S/4HANA Financials Subledger with the capability to manage cryptocurrency assets.  
 
 In general it can be used as the basis for other projects that are most appropriately implemented in the form of a subledger.
 
-[![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/s4hana-crypto-assets-subledger)](https://api.reuse.software/info/github.com/SAP-samples/s4hana-crypto-assets-subledger)
-
 ## Description
 
-The Crypto Assets Subledger is a Core S/4 HANA add-on implemented in ABAP as a subledger.
+The Crypto Assets Subledger is a Core S/4HANA add-on implemented in ABAP as a subledger.
 
 For a more detailed description, please consult the project's [Wiki](https://github.com/SAP-samples/s4hana-crypto-assets-subledger/wiki).
 
 
 ## Requirements
 
- - A productive S/4 HANA Cloud instance or S/4 HANA on-premise instance.
+ - A productive cloud instance or SAP S/4HANA on-premise instance.
  - A functional grasp of the ABAP development language and tools.
  - A functional grasp of GAAP accounting principles and practices.
 

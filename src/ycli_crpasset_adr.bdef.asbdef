@@ -1,0 +1,27 @@
+managed; // implementation in class zbp_cli_crpasset_adr unique;
+//strict;
+
+define behavior for YCLI_CRPASSET_ADR //alias <alias_name>
+persistent table YCL_CRPASSET_ADR
+lock master
+//authorization master ( instance )
+//etag master <field_name>
+{
+  create;
+  update;
+  delete;
+
+  field (numbering : managed , readonly )   CryptoAssetUuid;
+
+  mapping for YCL_CRPASSET_ADR
+  {
+    CryptoAssetUuid = crypto_asset_uuid;
+    CompanyCode     = companycode;
+    CryptoAssetType = crypto_asset_type;
+    CryptoAssetAddr = crypto_asset_addr;
+    CustodyUuid     = custody_uuid;
+
+  }
+
+
+}

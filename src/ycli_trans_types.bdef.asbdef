@@ -1,0 +1,19 @@
+managed; // implementation in class zbp_cli_trans_types unique;
+//strict;
+
+define behavior for YCLI_TRANS_TYPES //alias <alias_name>
+persistent table YCL_TRANS_TYPES
+lock master
+//authorization master ( instance )
+//etag master <field_name>
+{
+  create;
+  update;
+  delete;
+
+    mapping for YCL_TRANS_TYPES
+  {
+    Transtype = transtype;
+    Debitind = debitind;
+  }
+}

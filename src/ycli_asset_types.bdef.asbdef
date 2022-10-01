@@ -1,0 +1,21 @@
+managed; //implementation in class zbp_cli_asset_types unique;
+//strict;
+
+define behavior for YCLI_ASSET_TYPES //alias <alias_name>
+persistent table YCL_ASSET_TYPES
+lock master
+//authorization master ( instance )
+//etag master <field_name>
+{
+  create;
+  update;
+  delete;
+
+  mapping for YCL_ASSET_TYPES
+  {
+    CryptoAssetType = crypto_asset_type;
+    CryptoAssetDesc = crypto_asset_desc;
+
+  }
+
+}

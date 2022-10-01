@@ -25,17 +25,20 @@ CLASS ycl_gen_table_data IMPLEMENTATION.
         tran_uuid = 'A5EFA03E2BD4432DB6FF93A5A5215048'
         ctimestamp = '20200310111041.2251330'
         transtype = 'BUY'
-        asset = 'BTC'
+        crypto_asset_uuid  = 'BDE52AE2E5DC4ADE8DE32CD284B731BB'
+*        To Addr 0x6feA59921683bd5bb3EFb168fc0D52194B480728
         quantitytransacted = '1'
         fees = '0.01'
         notes = 'First BTC Purchase'
-        managed_addr = '0x6feA59921683bd5bb3EFb168fc0D52194B480728'
         bpartner_addr = '0x6feA59921683bd5bb3EFb168fc0D52194B480728'
         remote_trans_hash = '0x0b9494b0384bf96e6f65977bd32eb0e7b850c7c98f039db81e4edf11503f5f0a'
         status = 1
         parent = ''
         dispose = ''
         reportable = 'X'
+        transactionamount  = '20000.00'
+        transactionfeeamount = '200.00'
+        transactioncurrency = 'USD'
         )
     ).
 

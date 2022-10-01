@@ -1,0 +1,38 @@
+managed; // implementation in class zbp_cli_trans unique;
+//strict ;
+
+define behavior for YCLI_TRANS //alias <alias_name>
+persistent table YCL_TRANS
+lock master
+//authorization master ( instance )
+//etag master <field_name>
+{
+  create;
+  update;
+  delete;
+
+  field (numbering : managed , readonly )   TranUuid;
+
+  mapping for YCL_TRANS
+  {
+
+
+    TranUuid            = tran_uuid;
+    Ctimestamp          = ctimestamp;
+    Transtype           = transtype;
+    CryptoAssetUuid     = crypto_asset_uuid;
+    Quantitytransacted  = quantitytransacted;
+    Fees                = fees;
+    Notes               = notes;
+    BpartnerAddr        = bpartner_addr;
+    RemoteTransHash     = remote_trans_hash;
+    Status              = status;
+    Parent              = parent;
+    Dispose             = dispose;
+    Reportable          = reportable;
+    Transactionamount   = transactionamount;
+    Transactionfeeamount = transactionfeeamount;
+    Transactioncurrency  = transactioncurrency;
+
+  }
+}

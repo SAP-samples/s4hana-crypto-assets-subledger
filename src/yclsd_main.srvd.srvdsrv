@@ -1,0 +1,9 @@
+@EndUserText.label: 'YCLSD_TRANS'
+define service YCLSD_MAIN {
+  expose YCLC_TRANS;
+  expose YCLC_CRPASSET_ADR;
+  expose YCLC_CRPASSET_ACC;
+  expose YCLC_ASSET_TYPES;
+  expose YCLC_TRANS_TYPES;
+  expose YCLC_ASSET_XRATE;
+}

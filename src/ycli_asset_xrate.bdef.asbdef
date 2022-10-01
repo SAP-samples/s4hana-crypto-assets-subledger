@@ -1,0 +1,25 @@
+managed; // implementation in class zbp_cli_asset_xrate unique;
+//strict;
+
+define behavior for YCLI_ASSET_XRATE //alias <alias_name>
+persistent table YCL_ASSET_XRATE
+lock master
+//authorization master ( instance )
+//etag master <field_name>
+{
+  create;
+  update;
+  delete;
+
+  mapping for YCL_ASSET_XRATE
+  {
+
+    CryptoAssetType = crypto_asset_type;
+    Ratetype = ratetype;
+    EffTimestamp = efftimestamp;
+    Unitqty = unitqty;
+    Currency = currency;
+    Value = value;
+  }
+
+}

@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_SRVB" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <SRVB>
+    <METADATA>
+     <NAME>YCLSB_ANALYTICS_INA</NAME>
+     <VERSION>active</VERSION>
+     <DESCRIPTION>YCLSB_ANALYTICS_INA</DESCRIPTION>
+    </METADATA>
+    <CONTENT>
+     <BIND_TYPE_IMPL>
+      <NAME>YCLSB_ANALYTICS_INA</NAME>
+     </BIND_TYPE_IMPL>
+     <BIND_TYPE>INA</BIND_TYPE>
+     <SERVICES>
+      <item>
+       <SERVICE_NAME>YCLSB_ANALYTICS_INA</SERVICE_NAME>
+       <SERVICE_CONTENT>
+        <item>
+         <SERVICE_VERSION>0001</SERVICE_VERSION>
+         <SRVD_REF>
+          <URI>/sap/bc/adt/ddic/srvd/sources/yclsd_analytics</URI>
+          <TYPE>SRVD/SRV</TYPE>
+          <NAME>YCLSD_ANALYTICS</NAME>
+         </SRVD_REF>
+        </item>
+       </SERVICE_CONTENT>
+      </item>
+     </SERVICES>
+    </CONTENT>
+    <BINDING_CREATED>true</BINDING_CREATED>
+   </SRVB>
+  </asx:values>
+ </asx:abap>
+</abapGit>

@@ -1,0 +1,37 @@
+managed; //implementation in class zbp_cli_crpasset_acc unique;
+//strict;
+
+define behavior for YCLI_CRPASSET_ACC //alias <alias_name>
+persistent table YCL_CRPASSET_ACC
+lock master
+//authorization master ( instance )
+//etag master <field_name>
+{
+  create;
+  update;
+  delete;
+
+  mapping for YCL_CRPASSET_ACC
+  {
+
+    Companycode  =  companycode ;
+    Sourceledger  =  sourceledger;
+    CryptoAssetType  =  crypto_asset_type;
+    CryptoAssetTreatment =  crypto_asset_treatment;
+    CryptAccntAsset=  crypt_accnt_asset;
+    CryptAccntFee  =  crypt_accnt_fee;
+    CryptAccntInt  =  crypt_accnt_int;
+    CryptAccntGlReal  =  crypt_accnt_gl_real;
+    CryptAccntGlUnreal  =  crypt_accnt_gl_unreal;
+    CryptRatetype  =  crypt_ratetype;
+    ControllingArea  =  controllingarea;
+    Costcenter  =  costcenter;
+    Profitcenter  =   profitcenter;
+    Businessarea  =  businessarea;
+
+
+
+
+  }
+
+}

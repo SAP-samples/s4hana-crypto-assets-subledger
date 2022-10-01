@@ -1,0 +1,4 @@
+@EndUserText.label: 'YCLSD_ANALYTICS'
+define service YCLSD_ANALYTICS {
+  expose YCLQ_VALUATION_FIN001;
+}

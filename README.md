@@ -26,7 +26,7 @@ Clone repo into the ABAP Development Tools and follow the build instructions.
 
 ## Known Issues
 
-No known issues.
+INA services (e.g. YCLSB_ANALYTICS_INA) need to be manually recreated.
 
 
 ## How to obtain support

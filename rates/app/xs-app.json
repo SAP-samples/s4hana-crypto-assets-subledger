@@ -3,15 +3,35 @@
     "authenticationMethod": "route",
     "routes": [
         {
-            "source": "^/srv/(.*)$",
-            "authenticationType": "xsuaa",
-            "scope": "$XSAPPNAME.User",
-            "destination": "srv"
+          "source": "/favicon.ico",
+          "authenticationType": "none",
+          "localDir": "resources"
         },
         {
-            "source": "^/(.*)",
-            "authenticationType": "none",
-            "localDir": "resources"
+          "source": "^/uploadCryptoData/(.*)$",
+          "authenticationType": "none",
+          "destination": "srv"
+        },
+        {
+          "source": "^/downloadCryptoData/(.*)$",
+          "authenticationType": "none",
+          "destination": "srv"
+        },
+        {
+          "source": "^/saas/(.*)$",
+          "authenticationType": "none",
+          "destination": "srv"
+        },
+        {
+          "source": "^/srv/(.*)$",
+          "authenticationType": "xsuaa",
+          "scope": "$XSAPPNAME.User",
+          "destination": "srv"
+        },
+        {
+          "source": "/(.*)",
+          "authenticationType": "none",
+          "destination": "srv"
         }
-    ]
+      ]
 }

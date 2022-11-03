@@ -1,6 +1,6 @@
 apiVersion: v2
-name: rates-app
-description: Helm chart for rates-app
+name: crypto-rates-app
+description: Helm chart for crypto-rates-app
 
 # A chart can be either an 'application' or a 'library' chart.
 #

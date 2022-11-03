@@ -3,9 +3,9 @@ clusterDomain: cryptoassetssubledger.com
 gateway: crypto-assets-subledger-aws-gateway.dev.svc.cluster.local
 services:
   app:
-    name: rates-app
+    name: crypto-rates-app
     image:
-      repository: rates-app
+      repository: crypto-rates-app
       tag: "latest"
       pullPolicy: Always
       imagePullSecretName: docker-config
@@ -13,10 +13,10 @@ services:
     service:
       port: 5000
   srv:
-    name: rates-srv
+    name: crypto-rates-srv
     service:
       port: 5001
   uaa:
-    name: rates-uaa
-    bindingName: rates-uaa-binding
-    bindingSecretName: rates-uaa-binding-secret
+    name: crypto-rates-uaa
+    bindingName: crypto-rates-uaa-binding
+    bindingSecretName: crypto-rates-uaa-binding-secret

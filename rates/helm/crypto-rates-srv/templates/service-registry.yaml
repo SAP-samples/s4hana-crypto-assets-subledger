@@ -10,7 +10,7 @@ spec:
   servicePlanName: application
   parameters:
     xsappname: '{{ .Values.services.uaa.xsappname }}'
-    appName: rates
+    appName: crypto-rates
     displayName: 'Crypto Rates'
     description: 'Kyma Multitenant Crypto Rates Fetching App'
     category: 'SaaS Multitenant Apps'

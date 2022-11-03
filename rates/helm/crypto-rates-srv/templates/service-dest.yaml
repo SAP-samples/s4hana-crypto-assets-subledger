@@ -13,7 +13,7 @@ spec:
       instance:
         existing_destinations_policy: ignore
         destinations:
-          - Name: rates-nw
+          - Name: crypto-rates-nw
             Description: Northwind
             URL: https://services.odata.org/v2/Northwind/Northwind.svc
             Type: HTTP

@@ -1,0 +1,22 @@
+dockerID: alunde
+clusterDomain: cryptoassetssubledger.com
+gateway: crypto-assets-subledger-aws-gateway.dev.svc.cluster.local
+services:
+  app:
+    name: rates-app
+    image:
+      repository: rates-app
+      tag: "latest"
+      pullPolicy: Always
+      imagePullSecretName: docker-config
+      port: 5000
+    service:
+      port: 5000
+  srv:
+    name: rates-srv
+    service:
+      port: 5001
+  uaa:
+    name: rates-uaa
+    bindingName: rates-uaa-binding
+    bindingSecretName: rates-uaa-binding-secret

@@ -1,0 +1,12 @@
+apiVersion: accounts.resource.api.sap/v1
+type: Folder
+metadata:
+  # The full path in which to create the folder.
+  path: /sap/btp/pes/crypto-assets-subledger
+  # The desired name for the folder. Can contain only lowercase alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character.
+  name: rates
+spec:
+  # The desired display name for the folder (optional)
+  displayName: Rates Service App
+  # The desired description for the folder (optional)
+  description: Multitenant BTP Kyma App

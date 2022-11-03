@@ -1,0 +1,12 @@
+apiVersion: accounts.resource.api.sap/v1
+type: ResourceGroup
+metadata:
+  # The full path in which to create the resource group.
+  path: /sap/btp/pes/crypto-assets-subledger/rates
+  # The desired name for the resource group. Can contain only lowercase alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character.
+  name: rates-resource-group
+spec:
+  # The desired display name for the resource group (optional)
+  displayName: Rates Resource Group
+  # The desired description for the resource group (optional)
+  description: Crypto Rates Service Resource Group

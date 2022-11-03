@@ -1,0 +1,22 @@
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  name: {{ .Values.services.app.name }}
+spec:
+  gateway: {{ .Values.gateway }}
+  rules:
+    - path: /.*
+      accessStrategies:
+        - config: {}
+          handler: noop
+      methods:
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        - HEAD
+  service:
+    host: {{ .Values.services.app.name }}.{{ .Values.clusterDomain }}
+    name: {{ .Values.services.app.name }}
+    port: {{ .Values.services.app.service.port }}

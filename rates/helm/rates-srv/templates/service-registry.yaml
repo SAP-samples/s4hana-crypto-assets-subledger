@@ -1,0 +1,19 @@
+apiVersion: services.cloud.sap.com/v1alpha1
+kind: ServiceInstance
+metadata:
+  name: '{{ .Values.services.registry.name }}'
+  labels:
+    app.kubernetes.io/name: '{{ .Values.services.registry.name }}'
+spec:
+  externalName: '{{ .Values.services.registry.name }}'
+  serviceOfferingName: saas-registry
+  servicePlanName: application
+  parameters:
+    xsappname: '{{ .Values.services.uaa.xsappname }}'
+    appName: rates
+    displayName: 'Crypto Rates'
+    description: 'Kyma Multitenant Crypto Rates Fetching App'
+    category: 'SaaS Multitenant Apps'
+    appUrls:
+      onSubscription: https://{{ .Values.services.srv.name }}.{{ .Values.clusterDomain }}/callback/v1.0/tenants/{tenantId}
+      getDependencies: https://{{ .Values.services.srv.name }}.{{ .Values.clusterDomain }}/callback/v1.0/dependencies

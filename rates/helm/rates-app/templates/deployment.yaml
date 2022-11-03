@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.services.app.name }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+    app: {{ .Values.services.app.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.services.app.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.services.app.name }}
+    spec:
+      containers:
+        - image: "{{ .Values.dockerID }}/{{ .Values.services.app.image.repository }}:{{ .Values.services.app.image.tag }}"
+          name: {{ .Values.services.app.name }}
+          imagePullPolicy: {{ .Values.services.app.image.pullPolicy }}
+          resources:
+            limits:
+              memory: 512Mi
+              cpu: "1"
+            requests:
+              memory: 256Mi
+              cpu: "0.2"
+          ports:
+            - name: http
+              containerPort: {{ .Values.services.app.image.port }}
+          volumeMounts:
+            - name: rates-uaa
+              mountPath: "/etc/secrets/sapcp/xsuaa/rates-uaa"
+              readOnly: true
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.services.app.name }}
+      imagePullSecrets:
+        - name: {{ .Values.services.app.image.imagePullSecretName }}
+      volumes:
+        - name: rates-uaa
+          secret:
+            secretName: {{ .Values.services.uaa.bindingSecretName }}

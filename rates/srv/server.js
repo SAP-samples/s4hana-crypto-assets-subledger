@@ -5,8 +5,8 @@ const xsenv = require('@sap/xsenv');
 xsenv.loadEnv();
 const services = xsenv.getServices({
     uaa: { label: 'xsuaa' },
-    registry: { label: 'saas-registry' }
-    , dest: { label: 'destination' }
+    registry: { label: 'saas-registry' },
+    dest: { label: 'destination' }
 });
 
 const httpClient = require('@sap-cloud-sdk/http-client');

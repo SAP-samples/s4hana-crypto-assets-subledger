@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.services.srvjs.name }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+    app: {{ .Values.services.srvjs.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.services.srvjs.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.services.srvjs.name }}
+    spec:
+      containers:
+        - image: "{{ .Values.dockerID }}/{{ .Values.services.srvjs.image.repository }}:{{ .Values.services.srvjs.image.tag }}"
+          name: {{ .Values.services.srvjs.name }}
+          imagePullPolicy: {{ .Values.services.srvjs.image.pullPolicy }}
+          resources:
+            limits:
+              memory: 512Mi
+              cpu: "1"
+            requests:
+              memory: 256Mi
+              cpu: "0.2"
+          ports:
+            - name: http
+              containerPort: {{ .Values.services.srvjs.image.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.services.srvjs.name }}
+          env:
+            - name: SERVICE_BINDING_ROOT
+              value: /bindings
+          volumeMounts:
+            - name: rates-uaa
+              mountPath: "/bindings/rates-uaa"
+              readOnly: true
+            - name: rates-registry
+              mountPath: "/bindings/rates-registry"
+              readOnly: true
+            - name: rates-dest
+              mountPath: "/bindings/rates-dest"
+              readOnly: true
+      volumes:
+        - name: rates-uaa
+          secret:
+            secretName: {{ .Values.services.uaa.bindingSecretName }}
+        - name: rates-registry
+          secret:
+            secretName: {{ .Values.services.registry.bindingSecretName }}
+        - name: rates-dest
+          secret:
+            secretName: {{ .Values.services.dest.bindingSecretName }}

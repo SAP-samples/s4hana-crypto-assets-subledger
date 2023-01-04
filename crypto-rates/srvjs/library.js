@@ -10,7 +10,7 @@ const httpClient = require('@sap-cloud-sdk/http-client');
 async function getSubscriptions(registry) {
     try {
         // get subscriptions
-        let res = await httpClient.executeHttpRequest({ destinationName: 'rates-registry' }, {
+        let res = await httpClient.executeHttpRequest({ destinationName: 'crypto-rates-registry' }, {
             method: 'GET',
             url: '/saas-manager/v1/application/subscriptions'
         });
@@ -25,19 +25,18 @@ const k8s = require('@kubernetes/client-node');
 
 async function createRoute(subscribedSubdomain, appName) {
     try {
-        let tenantHost = subscribedSubdomain  + '-rates-app';
+        let tenantHost = subscribedSubdomain  + '-crypto-rates-app';
         const apiRule = {
             apiVersion: process.env.apiRuleGroup + '/' +  process.env.apiRuleVersion,
             kind: 'APIRule',
             metadata: {
                 name: tenantHost,
                 labels: {
-                    'app.kubernetes.io/managed-by': 'rates-srv'
+                    'app.kubernetes.io/managed-by': 'crypto-rates-srv'
                 }
             },
             spec: {
                 gateway: process.env.gateway,
-                host: tenantHost + '.' + process.env.clusterDomain,
                 rules: [
                     {
                         path: '/.*',
@@ -58,16 +57,17 @@ async function createRoute(subscribedSubdomain, appName) {
                             }
                         ],
                         methods: [
-                            'HEAD',
                             'GET',
                             'POST',
                             'PUT',
                             'PATCH',
-                            'DELETE'
+                            'DELETE',
+                            'HEAD',
                         ]
                     }
                 ],
                 service: {
+                    host: tenantHost + '.' + process.env.clusterDomain,
                     name: process.env.appServiceName,
                     port: parseInt(process.env.appServicePort)
                 }
@@ -93,7 +93,7 @@ async function createRoute(subscribedSubdomain, appName) {
 
 async function deleteRoute(subscribedSubdomain, appName) {
     try {
-        let tenantHost = subscribedSubdomain  + '-rates-app';
+        let tenantHost = subscribedSubdomain  + '-crypto-rates-app';
         const kc = new k8s.KubeConfig();
         kc.loadFromCluster();
         const k8sApi = kc.makeApiClient(k8s.CustomObjectsApi);

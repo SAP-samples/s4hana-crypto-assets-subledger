@@ -1,0 +1,28 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  labels:
+    app.kubernetes.io/name: crypto-assets-subledger-aws-gateway
+  name: crypto-assets-subledger-aws-gateway
+  namespace: dev
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - hosts:
+        - '*.cryptoassetssubledger.com'
+      port:
+        name: crypto-assets-subledger-https
+        number: 443
+        protocol: HTTPS
+      tls:
+        credentialName: letsencrypt-cert-jx569
+        mode: SIMPLE
+    - hosts:
+        - '*.cryptoassetssubledger.com'
+      port:
+        name: crypto-assets-subledger-http
+        number: 80
+        protocol: HTTP
+      tls:
+        httpsRedirect: true

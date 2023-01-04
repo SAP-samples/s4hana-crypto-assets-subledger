@@ -1,5 +1,5 @@
 {
-    "name": "rates-srv",
+    "name": "crypto-rates-srv",
     "dependencies": {
         "express": "latest",
 

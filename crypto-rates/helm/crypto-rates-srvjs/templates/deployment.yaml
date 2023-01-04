@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.services.srvjs.name }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+    app: {{ .Values.services.srvjs.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.services.srvjs.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.services.srvjs.name }}
+    spec:
+      containers:
+        - image: "{{ .Values.dockerID }}/{{ .Values.services.srvjs.image.repository }}:{{ .Values.services.srvjs.image.tag }}"
+          name: {{ .Values.services.srvjs.name }}
+          imagePullPolicy: {{ .Values.services.srvjs.image.pullPolicy }}
+          resources:
+            limits:
+              memory: 512Mi
+              cpu: "1"
+            requests:
+              memory: 256Mi
+              cpu: "0.2"
+          ports:
+            - name: http
+              containerPort: {{ .Values.services.srvjs.image.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.services.srvjs.name }}
+          volumeMounts:
+            - name: crypto-rates-uaa
+              mountPath: "/etc/secrets/sapcp/xsuaa/crypto-rates-uaa"
+              readOnly: true
+      imagePullSecrets:
+        - name: {{ .Values.services.srvjs.image.imagePullSecretName }}
+      volumes:
+        - name: crypto-rates-uaa
+          secret:
+            secretName: {{ .Values.services.uaa.bindingSecretName }}

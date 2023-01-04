@@ -1,0 +1,15 @@
+apiVersion: dns.gardener.cloud/v1alpha1
+kind: DNSEntry
+metadata:
+  name: app
+  namespace: dev
+  labels:
+    app.kubernetes.io/name: app
+  annotations:
+    dns.gardener.cloud/class: garden
+spec:
+  dnsName: '*.cryptoassetssubledger.com'
+  targets:
+    - a51012a8cf0f942e284265abf956a28d-1143312290.eu-central-1.elb.amazonaws.com
+  text: []
+  ttl: 600

@@ -3,19 +3,9 @@
     "authenticationMethod": "route",
     "routes": [
         {
-            "source": "/favicon.ico",
-            "authenticationType": "none",
-            "localDir": "resources"
-        },
-        {
-            "source": "^/saas/(.*)$",
-            "authenticationType": "none",
-            "destination": "srv"
-        },
-        {
-            "source": "^/adm/(.*)$",
+            "source": "^/app/(.*)$",
             "authenticationType": "xsuaa",
-            "scope": "$XSAPPNAME.Admin",
+            "scope": "$XSAPPNAME.User",
             "destination": "srv"
         },
         {
@@ -25,9 +15,14 @@
             "destination": "srv"
         },
         {
+            "source": "^/srvjs/(.*)$",
+            "authenticationType": "xsuaa",
+            "destination": "srvjs"
+        },
+        {
             "source": "^/(.*)",
             "authenticationType": "none",
-            "destination": "srv"
+            "localDir": "resources"
         }
     ]
 }

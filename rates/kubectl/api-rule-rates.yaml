@@ -1,0 +1,23 @@
+apiVersion: gateway.kyma-project.io/v1alpha1
+kind: APIRule
+metadata:
+  name: crypto-assets-rates
+  namespace: dev
+  labels:
+    app.kubernetes.io/name: crypto-assets-rates
+spec:
+  gateway: crypto-assets-subledger-aws-gateway.aws-dns.svc.cluster.local
+  rules:
+    - accessStrategies:
+        - handler: allow
+          config: {}
+      methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+      path: /.*
+  service:
+    host: rates.cryptoassetssubledger.com
+    name: crypto-rates-service-app
+    port: 5000

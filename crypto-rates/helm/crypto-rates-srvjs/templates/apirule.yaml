@@ -1,7 +1,7 @@
 apiVersion: gateway.kyma-project.io/v1alpha1
 kind: APIRule
 metadata:
-  name: provider-{{ .Values.services.app.name }}
+  name: {{ .Values.services.srvjs.name }}
 spec:
   gateway: {{ .Values.gateway }}
   rules:
@@ -17,6 +17,7 @@ spec:
         - DELETE
         - HEAD
   service:
-    host: cryptorates-{{ .Values.services.app.name }}.{{ .Values.clusterDomain }}
-    name: {{ .Values.services.app.name }}
-    port: {{ .Values.services.app.service.port }}
+    host: {{ .Values.services.srvjs.name }}.{{ .Values.clusterDomain }}
+
+    name: {{ .Values.services.srvjs.name }}
+    port: {{ .Values.services.srvjs.service.port }}

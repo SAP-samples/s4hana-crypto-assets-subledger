@@ -25,6 +25,33 @@ app.use(express.json());
 
 const lib = require('./library');
 
+app.get("*", function (req, res, next) {
+
+    var hostname = "localhost";
+
+    if (((typeof req) == "object") && ((typeof req.headers) == "object") && ((typeof req.headers['x-forwarded-host']) == "string")) {
+        hostname = req.headers['x-forwarded-host'];
+    }
+    console.log(req.method + " " + hostname + req.url);
+    // console.log(util.inspect(req, {depth: 1}));
+    next();
+
+});
+
+app.get('/callback/links', function (req, res) {
+    console.log("served from srv/server.js");
+    
+    console.log(req.headers['x-forwarded-host']);
+
+    var responseStr = "";
+    responseStr += "<!DOCTYPE HTML><html><head><title>Crypto Rates SRV</title></head><body><h3>Crypto Rates SRV</h3><br />";
+    responseStr += "<a href=\"/callback/links\">Callback Links.</a><br />";
+    responseStr += "<a href=\"/srv/info\">SRV Invo</a><br />";
+    responseStr += "<br />";
+    responseStr += "<a href=\"/\">Return to Root.</a><br />";
+    responseStr += "</body></html>";
+    res.status(200).send(responseStr);
+});
 
 // subscribe/onboard a subscriber tenant
 app.put('/callback/v1.0/tenants/*', function (req, res) {
@@ -77,14 +104,6 @@ app.get('/callback/v1.0/dependencies', function (req, res) {
     }];
     console.log('Dependencies:', dependencies);
     res.status(200).json(dependencies);
-});
-
-// app user info
-app.get('/app/info', function (req, res) {
-    let info = {
-        'path': '/app/info'
-    };
-    res.status(200).json(info);
 });
 
 // app user info

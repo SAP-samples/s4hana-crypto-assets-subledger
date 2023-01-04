@@ -1,6 +1,8 @@
 dockerID: alunde
-clusterDomain: cryptoassetssubledger.com
-gateway: crypto-assets-subledger-aws-gateway.dev.svc.cluster.local
+#clusterDomain: cryptoassetssubledger.com
+clusterDomain: af4cba2.kyma.ondemand.com
+#gateway: crypto-assets-subledger-aws-gateway.dev.svc.cluster.local
+gateway: kyma-gateway.kyma-system.svc.cluster.local
 apiRuleGroup: gateway.kyma-project.io
 apiRuleVersion: v1alpha1
 apiRules: apirules
@@ -19,6 +21,10 @@ services:
       port: 5001
     service:
       port: 5001
+  srvjs:
+    name: crypto-rates-srvjs
+    service:
+      port: 5002
   uaa:
     name: crypto-rates-uaa
     xsappname: crypto-rates

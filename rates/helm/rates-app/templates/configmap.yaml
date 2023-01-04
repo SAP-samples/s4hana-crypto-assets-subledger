@@ -10,5 +10,10 @@ data:
         "name": "srv",
         "url": "http://{{ .Values.services.srv.name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.services.srv.service.port }}",
         "forwardAuthToken": true
+      },
+      {
+        "name": "srvjs",
+        "url": "http://{{ .Values.services.srvjs.name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.services.srvjs.service.port }}",
+        "forwardAuthToken": true
       }
     ]

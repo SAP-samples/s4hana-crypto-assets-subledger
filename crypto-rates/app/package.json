@@ -1,5 +1,5 @@
 {
-    "name": "rates-app",
+    "name": "crypto-rates-app",
     "dependencies": {
         "@sap/approuter": "latest"
     },

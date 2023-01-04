@@ -1,0 +1,52 @@
+{
+    "welcomeFile": "index.html",
+    "websockets": {
+        "enabled": true
+    },
+    "authenticationMethod": "route",
+    "routes": [
+        {
+            "source": "/favicon.ico",
+            "authenticationType": "none",
+            "localDir": "resources"
+        },
+        {
+            "source": "/index.html",
+            "authenticationType": "none",
+            "localDir": "resources"
+        },
+        {
+            "source": "^/callback/(.*)$",
+            "authenticationType": "none",
+            "destination": "srv"
+        },
+        {
+            "source": "^/saas/(.*)$",
+            "authenticationType": "none",
+            "destination": "srv"
+        },
+        {
+            "source": "^/adm/(.*)$",
+            "authenticationType": "xsuaa",
+            "scope": "$XSAPPNAME.Admin",
+            "destination": "srv"
+        },
+        {
+            "source": "^/srv/(.*)$",
+            "authenticationType": "xsuaa",
+            "scope": "$XSAPPNAME.User",
+            "destination": "srv"
+        },
+        {
+            "source": "^/srvjs/(.*)$",
+            "authenticationType": "xsuaa",
+            "scope": "$XSAPPNAME.User",
+            "destination": "srvjs"
+        },
+        {
+            "source": "^/(.*)",
+            "authenticationType": "none",
+            "destination": "srv"
+        }
+    ]
+}

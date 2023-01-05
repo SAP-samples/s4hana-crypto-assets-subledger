@@ -1,5 +1,8 @@
 const express = require('express');
 const app = express();
+var server = require("http").createServer();
+
+const util = require('util');
 
 const xsenv = require('@sap/xsenv');
 // xsenv.loadEnv("default-env-good.json");
@@ -25,40 +28,26 @@ app.use(passport.authenticate('JWT', {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// app user info
-app.get('/srvjs/info', function (req, res) {
-    console.log('srvjs info');
-    if (req.authInfo.checkScope('$XSAPPNAME.User')) {
-        let info = {
-            'userInfo': req.user,
-            'subdomain': req.authInfo.getSubdomain(),
-            'tenantId': req.authInfo.getZoneId()
-        };
-        res.status(200).json(info);
-    } else {
-        res.status(403).send('Forbidden');
-    }
-});
 
-// app registration
-app.get('/srvjs/reg', function (req, res) {
-    console.log('srvjs registration');
-    if (req.authInfo.checkScope('$XSAPPNAME.User')) {
-        let info = {
-            'userInfo': req.user,
-            'subdomain': req.authInfo.getSubdomain(),
-            'tenantId': req.authInfo.getZoneId()
-        };
-        res.status(200).json(info);
-    } else {
-        res.status(403).send('Forbidden');
+app.get("*", function (req, res, next) {
+
+    var hostname = "localhost";
+
+    if (((typeof req) == "object") && ((typeof req.headers) == "object") && ((typeof req.headers['x-forwarded-host']) == "string")) {
+        hostname = req.headers['x-forwarded-host'];
     }
+    console.log(req.method + " " + hostname + req.url);
+    console.log("tenantId: " + req.authInfo.getZoneId());
+    // console.log(util.inspect(req.authInfo, {depth: 1}));
+    next();
+
 });
 
 //Setup Routes
-// var router = require("./router")(app, server);
+var router = require("./router")(app, server);
 
 const port = process.env.PORT || 5002;
-app.listen(port, function () {
+server.on("request", app);
+server.listen(port, function () {
     console.info('Listening on http://localhost:' + port);
 });

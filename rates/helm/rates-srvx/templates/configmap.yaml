@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.services.srvx.name }}
+data:
+  clusterDomain: {{ .Values.clusterDomain }}
+  gateway: {{ .Values.gateway }}
+  namespace: {{ .Release.Namespace }}
+  apiRuleGroup: {{ .Values.apiRuleGroup }}
+  apiRuleVersion: {{ .Values.apiRuleVersion }}
+  apiRules: {{ .Values.apiRules }}
+  appServiceName: {{ .Values.services.app.name }}
+  appServicePort: '{{ .Values.services.app.service.port }}'

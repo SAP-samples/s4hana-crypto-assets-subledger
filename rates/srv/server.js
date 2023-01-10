@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+var server = require("http").createServer();
 
 const xsenv = require('@sap/xsenv');
 xsenv.loadEnv();
@@ -16,15 +17,55 @@ const xssec = require('@sap/xssec');
 const passport = require('passport');
 passport.use('JWT', new xssec.JWTStrategy(services.uaa));
 app.use(passport.initialize());
-app.use(passport.authenticate('JWT', {
-    session: false
-}));
+// app.use(passport.authenticate('JWT', {
+//     session: false
+// }));
+var PassportAuthenticateMiddleware = passport.authenticate('JWT', {session:false});
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 const lib = require('./library');
 
+app.get("*", function (req, res, next) {
+
+    var hostname = "localhost";
+
+    if (((typeof req) == "object") && ((typeof req.headers) == "object") && ((typeof req.headers['x-forwarded-host']) == "string")) {
+        hostname = req.headers['x-forwarded-host'];
+    }
+    console.log("req: " + req.method + " " + hostname + req.url);
+    next();
+
+});
+
+// app user info
+app.get(['/','/noauth','/srv/noauth'], function (req, res) {
+    var hostname = "localhost";
+
+    if (((typeof req) == "object") && ((typeof req.headers) == "object") && ((typeof req.headers['x-forwarded-host']) == "string")) {
+        hostname = req.headers['x-forwarded-host'];
+    }
+    console.log(req.method + " " + hostname + req.url);
+    let info = {
+        'noauth': hostname + ":" + req.url
+    };
+    res.status(200).json(info);
+});
+
+app.get("*", PassportAuthenticateMiddleware, function (req, res, next) {
+
+    var hostname = "localhost";
+
+    if (((typeof req) == "object") && ((typeof req.headers) == "object") && ((typeof req.headers['x-forwarded-host']) == "string")) {
+        hostname = req.headers['x-forwarded-host'];
+    }
+    console.log(req.method + " " + hostname + req.url);
+    console.log("tenantId: " + req.authInfo.getZoneId());
+    // console.log(util.inspect(req.authInfo, {depth: 1}));
+    next();
+
+});
 
 // subscribe/onboard a subscriber tenant
 app.put('/callback/v1.0/tenants/*', function (req, res) {
@@ -143,6 +184,7 @@ app.get('/srv/destinations', async function (req, res) {
 });
 
 const port = process.env.PORT || 5001;
-app.listen(port, function () {
+server.on("request", app);
+server.listen(port, function () {
     console.info('Listening on http://localhost:' + port);
 });

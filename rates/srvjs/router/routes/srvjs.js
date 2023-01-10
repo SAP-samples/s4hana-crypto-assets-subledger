@@ -57,12 +57,24 @@ module.exports = () => {
 	
 	// app user info
 	app.get('/info', function (req, res) {
-		if (req.authInfo.checkScope('$XSAPPNAME.User')) {
-			let info = {
-				'userInfo': req.user,
-				'subdomain': req.authInfo.getSubdomain(),
-				'tenantId': req.authInfo.getZoneId()
-			};
+		
+		var user = "unknown";
+		var subdomain = "unknown";
+		var tenant = "unknown";
+
+		if (((typeof req) == "object") && ((typeof req.authInfo) == "object")) {
+			user = req.user;
+			subdomain = req.authInfo.getSubdomain();
+			tenant = req.authInfo.getZoneId();
+		}
+
+		let info = {
+			'userInfo': user,
+			'subdomain': subdomain,
+			'tenantId': tenant
+		};
+
+		if (((typeof req) == "object") && ((typeof req.authInfo) == "object") && req.authInfo.checkScope('$XSAPPNAME.User')) {
 			res.status(200).json(info);
 		} else {
 			res.status(403).send('Forbidden');

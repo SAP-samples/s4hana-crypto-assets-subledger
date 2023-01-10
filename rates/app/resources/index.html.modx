@@ -12,7 +12,7 @@
     <a href="/srv/info">Srv Info</a> Served By SRV<br>
     <a href="/srvjs/info">SrvJS Info</a> Served By SRVJS<br>
     <a href="/adm/info">Adm Info</a> Served By SRVJS<br>
-    <a href="/srvx/info">SrvX Info</a> Served By SRVX<br>
+    <a href="/modx/info">modx Info</a> Served By modx<br>
     <a href="/srv/subscriptions">Subscriptions</a> Served By SRV<br>
     <a href="https://cryptorates.authentication.us10.hana.ondemand.com/config?action=who">Check cryptorates authorities</a><br>
     <a href="https://partner-sub1.authentication.us10.hana.ondemand.com/config?action=who">Check sub1 authorities : asqgp8lhu</a><br>

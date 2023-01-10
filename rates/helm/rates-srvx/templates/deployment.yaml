@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.services.srvx.name }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+    app: {{ .Values.services.srvx.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.services.srvx.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.services.srvx.name }}
+    spec:
+      containers:
+        - image: "{{ .Values.dockerID }}/{{ .Values.services.srvx.image.repository }}:{{ .Values.services.srvx.image.tag }}"
+          name: {{ .Values.services.srvx.name }}
+          imagePullPolicy: {{ .Values.services.srvx.image.pullPolicy }}
+          resources:
+            limits:
+              memory: 512Mi
+              cpu: "1"
+            requests:
+              memory: 256Mi
+              cpu: "0.2"
+          ports:
+            - name: http
+              containerPort: {{ .Values.services.srvx.image.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.services.srvx.name }}
+          env:
+            - name: SERVICE_BINDING_ROOT
+              value: /bindings
+          volumeMounts:
+            - name: rates-uaa
+              mountPath: "/bindings/rates-uaa"
+              readOnly: true
+      volumes:
+        - name: rates-uaa
+          secret:
+            secretName: {{ .Values.services.uaa.bindingSecretName }}

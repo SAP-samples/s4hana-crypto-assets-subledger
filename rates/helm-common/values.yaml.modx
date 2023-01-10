@@ -1,9 +1,17 @@
 dockerID: alunde
 providerSubdomain: cryptorates
-clusterDomain: cryptoassetssubledger.com
-#clusterDomain: af4cba2.kyma.ondemand.com
-gateway: crypto-assets-subledger-aws-gateway.dev.svc.cluster.local
-#gateway: kyma-gateway.kyma-system.svc.cluster.local
+#
+# Custom Domain
+#clusterDomain: cryptoassetssubledger.com
+#gateway: crypto-assets-subledger-aws-gateway.dev.svc.cluster.local
+#
+# Default Domain
+clusterDomain: af4cba2.kyma.ondemand.com
+gateway: kyma-gateway.kyma-system.svc.cluster.local
+#
+apiRuleGroup: gateway.kyma-project.io
+apiRuleVersion: v1beta1
+apiRules: apirules
 services:
   app:
     name: rates-app
@@ -32,6 +40,15 @@ services:
       port: 5002
     service:
       port: 5002
+  modx:
+    name: rates-modx
+    image:
+      repository: rates-modx
+      tag: "latest"
+      pullPolicy: Always
+      port: 5003
+    service:
+      port: 5003
   uaa:
     name: rates-uaa
     xsappname: rates

@@ -1,6 +1,6 @@
 FROM node:16-slim
 WORKDIR /app
-COPY modx .
+COPY zzoz .
 RUN chown -R node:node /app/server.js
 RUN chmod 777 /app/server.js
 RUN apt-get update

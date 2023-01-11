@@ -17,8 +17,8 @@ data:
         "forwardAuthToken": true
       },
       {
-        "name": "zzoz",
-        "url": "http://{{ .Values.services.zzoz.name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.services.zzoz.service.port }}",
+        "name": "yyoy",
+        "url": "http://{{ .Values.services.yyoy.name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.services.yyoy.service.port }}",
         "forwardAuthToken": true
       }
     ]

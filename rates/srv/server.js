@@ -39,6 +39,24 @@ app.get("*", function (req, res, next) {
 
 });
 
+// Locally encoded favicon
+// https://stackoverflow.com/questions/15463199/how-to-set-custom-favicon-in-express
+// make an icon maybe here: http://www.favicon.cc/ or here :http://favicon-generator.org
+
+// convert it to base64 maybe here: http://base64converter.com/
+
+// then replace the icon base 64 value
+
+const favicon = new Buffer.from('AAABAAEAEBAQAAAAAAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA/4QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEREQAAAAAAEAAAEAAAAAEAAAABAAAAEAAAAAAQAAAQAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAEAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAA//8AAP//AAD8HwAA++8AAPf3AADv+wAA7/sAAP//AAD//wAA+98AAP//AAD//wAA//8AAP//AAD//wAA', 'base64'); 
+app.get("/favicon.ico", function(req, res) {
+ res.statusCode = 200;
+ res.setHeader('Content-Length', favicon.length);
+ res.setHeader('Content-Type', 'image/x-icon');
+ res.setHeader("Cache-Control", "public, max-age=2592000");                // expiers after a month
+ res.setHeader("Expires", new Date(Date.now() + 2592000000).toUTCString());
+ res.end(favicon);
+});
+
 // app user info
 app.get(['/','/noauth','/srv/noauth'], function (req, res) {
     var hostname = "localhost";

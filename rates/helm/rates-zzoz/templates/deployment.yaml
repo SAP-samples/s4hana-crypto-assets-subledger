@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.services.zzoz.name }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+    app: {{ .Values.services.zzoz.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.services.zzoz.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.services.zzoz.name }}
+    spec:
+      containers:
+        - image: "{{ .Values.dockerID }}/{{ .Values.services.zzoz.image.repository }}:{{ .Values.services.zzoz.image.tag }}"
+          name: {{ .Values.services.zzoz.name }}
+          imagePullPolicy: {{ .Values.services.zzoz.image.pullPolicy }}
+          resources:
+            limits:
+              memory: 512Mi
+              cpu: "1"
+            requests:
+              memory: 256Mi
+              cpu: "0.2"
+          ports:
+            - name: http
+              containerPort: {{ .Values.services.zzoz.image.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.services.zzoz.name }}
+          env:
+            - name: SERVICE_BINDING_ROOT
+              value: /bindings
+          volumeMounts:
+            - name: rates-uaa
+              mountPath: "/bindings/rates-uaa"
+              readOnly: true
+      volumes:
+        - name: rates-uaa
+          secret:
+            secretName: {{ .Values.services.uaa.bindingSecretName }}

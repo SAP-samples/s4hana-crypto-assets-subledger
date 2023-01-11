@@ -54,7 +54,7 @@ app.get("/favicon.ico", function(req, res) {
 });
 
 // app user info
-app.get(['/','/noauth','/modx/noauth'], function (req, res) {
+app.get(['/','/noauth','/xyox/noauth'], function (req, res) {
     var hostname = "localhost";
 
     if (((typeof req) == "object") && ((typeof req.headers) == "object") && ((typeof req.headers['x-forwarded-host']) == "string")) {
@@ -82,7 +82,7 @@ app.get("*", PassportAuthenticateMiddleware, function (req, res, next) {
 });
 
 // app user info
-app.get('/modx/info', function (req, res) {
+app.get('/xyox/info', function (req, res) {
     if (req.authInfo.checkScope('$XSAPPNAME.User')) {
         let info = {
             'userInfo': req.user,

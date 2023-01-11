@@ -1,6 +1,6 @@
 apiVersion: v2
-name: rates-srvx
-description: Helm chart for rates-srvx
+name: rates-yyoy
+description: Helm chart for rates-yyoy
 
 # A chart can be either an 'application' or a 'library' chart.
 #

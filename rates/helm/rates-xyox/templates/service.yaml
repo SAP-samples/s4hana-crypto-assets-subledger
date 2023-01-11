@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.xyox.name }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+    app: {{ .Values.services.xyox.name }}
+spec:
+  ports:
+    - name: http
+      port: {{ .Values.services.xyox.service.port }}
+      targetPort: {{ .Values.services.xyox.image.port }}
+      protocol: TCP
+  selector:
+    app: {{ .Values.services.xyox.name }}

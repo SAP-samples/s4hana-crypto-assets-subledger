@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.zzoz.name }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+    app: {{ .Values.services.zzoz.name }}
+spec:
+  ports:
+    - name: http
+      port: {{ .Values.services.zzoz.service.port }}
+      targetPort: {{ .Values.services.zzoz.image.port }}
+      protocol: TCP
+  selector:
+    app: {{ .Values.services.zzoz.name }}

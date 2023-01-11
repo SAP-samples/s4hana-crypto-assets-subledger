@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.services.yyoy.name }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+    app: {{ .Values.services.yyoy.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.services.yyoy.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.services.yyoy.name }}
+    spec:
+      containers:
+        - image: "{{ .Values.dockerID }}/{{ .Values.services.yyoy.image.repository }}:{{ .Values.services.yyoy.image.tag }}"
+          name: {{ .Values.services.yyoy.name }}
+          imagePullPolicy: {{ .Values.services.yyoy.image.pullPolicy }}
+          resources:
+            limits:
+              memory: 512Mi
+              cpu: "1"
+            requests:
+              memory: 256Mi
+              cpu: "0.2"
+          ports:
+            - name: http
+              containerPort: {{ .Values.services.yyoy.image.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.services.yyoy.name }}
+          env:
+            - name: SERVICE_BINDING_ROOT
+              value: /bindings
+          volumeMounts:
+            - name: rates-uaa
+              mountPath: "/bindings/rates-uaa"
+              readOnly: true
+      volumes:
+        - name: rates-uaa
+          secret:
+            secretName: {{ .Values.services.uaa.bindingSecretName }}

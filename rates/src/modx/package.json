@@ -1,5 +1,5 @@
 {
-    "name": "rates-srv",
+    "name": "projx-modx",
     "dependencies": {
         "express": "latest",
         "axios": "latest",

@@ -29,7 +29,7 @@ rmdir helm-common
 Run Tar from src
 ```
 cd src
-tar cvf ../tools/modx.tar Makefile.modx app/resources/index.html.modx app/xs-app.json.modx modx helm/rates-app/templates/configmap.yaml.modx helm/modx
+tar cvf ../tools/modx.tar .
 ```
 Test UnTar in tmp
 ```

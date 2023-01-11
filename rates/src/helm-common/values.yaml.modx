@@ -14,54 +14,54 @@ apiRuleVersion: v1beta1
 apiRules: apirules
 services:
   app:
-    name: rates-app
+    name: projx-app
     image:
-      repository: rates-app
+      repository: projx-app
       tag: "latest"
       pullPolicy: Always
       port: 5000
     service:
       port: 5000
   srv:
-    name: rates-srv
+    name: projx-srv
     image:
-      repository: rates-srv
+      repository: projx-srv
       tag: "latest"
       pullPolicy: Always
       port: 5001
     service:
       port: 5001
   srvjs:
-    name: rates-srvjs
+    name: projx-srvjs
     image:
-      repository: rates-srvjs
+      repository: projx-srvjs
       tag: "latest"
       pullPolicy: Always
       port: 5002
     service:
       port: 5002
   modx:
-    name: rates-modx
+    name: projx-modx
     image:
-      repository: rates-modx
+      repository: projx-modx
       tag: "latest"
       pullPolicy: Always
       port: 5003
     service:
       port: 5003
   uaa:
-    name: rates-uaa
-    xsappname: rates
-    bindingName: rates-uaa-binding
-    bindingSecretName: rates-uaa-binding-secret
+    name: projx-uaa
+    xsappname: projx
+    bindingName: projx-uaa-binding
+    bindingSecretName: projx-uaa-binding-secret
   registry:
-    name: rates-registry
-    bindingName: rates-registry-binding
-    bindingSecretName: rates-registry-binding-secret
+    name: projx-registry
+    bindingName: projx-registry-binding
+    bindingSecretName: projx-registry-binding-secret
   role:
-    name: rates-role
-    bindingName: rates-role-binding
+    name: projx-role
+    bindingName: projx-role-binding
   dest:
-    name: rates-dest
-    bindingName: rates-dest-binding
-    bindingSecretName: rates-dest-binding-secret
+    name: projx-dest
+    bindingName: projx-dest-binding
+    bindingSecretName: projx-dest-binding-secret

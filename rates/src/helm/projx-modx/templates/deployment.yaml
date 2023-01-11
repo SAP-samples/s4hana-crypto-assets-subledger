@@ -36,10 +36,10 @@ spec:
             - name: SERVICE_BINDING_ROOT
               value: /bindings
           volumeMounts:
-            - name: rates-uaa
-              mountPath: "/bindings/rates-uaa"
+            - name: projx-uaa
+              mountPath: "/bindings/projx-uaa"
               readOnly: true
       volumes:
-        - name: rates-uaa
+        - name: projx-uaa
           secret:
             secretName: {{ .Values.services.uaa.bindingSecretName }}

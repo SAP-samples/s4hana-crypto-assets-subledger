@@ -27,7 +27,7 @@ app.use(express.json());
 
 const lib = require('./library');
 
-app.get("*", function (req, res, next) {
+app.all("*", function (req, res, next) {
 
     var hostname = "localhost";
 
@@ -71,7 +71,7 @@ app.get(['/','/noauth','/srv/noauth'], function (req, res) {
     res.status(200).json(info);
 });
 
-app.get("*", PassportAuthenticateMiddleware, function (req, res, next) {
+app.all("*", function (req, res, next) {
 
     var hostname = "localhost";
 
@@ -79,14 +79,12 @@ app.get("*", PassportAuthenticateMiddleware, function (req, res, next) {
         hostname = req.headers['x-forwarded-host'];
     }
     console.log(req.method + " " + hostname + req.url);
-    console.log("tenantId: " + req.authInfo.getZoneId());
-    // console.log(util.inspect(req.authInfo, {depth: 1}));
     next();
 
 });
 
 // subscribe/onboard a subscriber tenant
-app.put('/callback/v1.0/tenants/*', function (req, res) {
+app.put('/callback/v1.0/tenants/*', PassportAuthenticateMiddleware, function (req, res) {
     if (!req.authInfo.checkLocalScope('Callback')) {
         console.log('Forbidden: Subscribe requires Callback scope!');
         res.status(403).send('Forbidden');
@@ -106,7 +104,7 @@ app.put('/callback/v1.0/tenants/*', function (req, res) {
 });
 
 // unsubscribe/offboard a subscriber tenant
-app.delete('/callback/v1.0/tenants/*', function (req, res) {
+app.delete('/callback/v1.0/tenants/*', PassportAuthenticateMiddleware, function (req, res) {
     if (!req.authInfo.checkLocalScope('Callback')) {
         console.log('Forbidden: Unsubscribe requires Callback scope!');
         res.status(403).send('Forbidden');
@@ -125,7 +123,7 @@ app.delete('/callback/v1.0/tenants/*', function (req, res) {
 });
 
 // get reuse service dependencies
-app.get('/callback/v1.0/dependencies', function (req, res) {
+app.get('/callback/v1.0/dependencies', PassportAuthenticateMiddleware, function (req, res) {
     if (!req.authInfo.checkLocalScope('Callback')) {
         console.log('Forbidden: Dependencies requires Callback scope!');
         res.status(403).send('Forbidden');
@@ -147,7 +145,7 @@ app.get('/app/info', function (req, res) {
 });
 
 // app user info
-app.get('/srv/info', function (req, res) {
+app.get('/srv/info', PassportAuthenticateMiddleware, function (req, res) {
     if (req.authInfo.checkScope('$XSAPPNAME.User')) {
         let info = {
             'userInfo': req.user,
@@ -161,7 +159,7 @@ app.get('/srv/info', function (req, res) {
 });
 
 // app subscriptions
-app.get('/srv/subscriptions', function (req, res) {
+app.get('/srv/subscriptions', PassportAuthenticateMiddleware, function (req, res) {
     if (req.authInfo.checkScope('$XSAPPNAME.Admin')) {
         lib.getSubscriptions(services.registry).then(
             function (result) {
@@ -178,7 +176,7 @@ app.get('/srv/subscriptions', function (req, res) {
 
 
 // destination reuse service
-app.get('/srv/destinations', async function (req, res) {
+app.get('/srv/destinations', PassportAuthenticateMiddleware, async function (req, res) {
     if (req.authInfo.checkScope('$XSAPPNAME.User')) {
         try {
             let res1 = await httpClient.executeHttpRequest(

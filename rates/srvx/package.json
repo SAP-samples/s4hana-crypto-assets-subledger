@@ -9,9 +9,11 @@
         "@sap/xsenv": "latest",
         "@sap/xssec": "latest",
         "passport": "latest",
-        "nodemon": "latest"
+        "nodemon": "latest",
+        "better-sqlite3": "latest",
+        "nunjucks": "latest"
     },
     "scripts": {
-        "start": "nodemon server.js"
+        "start": "nodemon -e js,njk server.js"
     }
 }

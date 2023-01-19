@@ -2,12 +2,12 @@ dockerID: alunde
 providerSubdomain: cryptorates
 #
 # Custom Domain
-#clusterDomain: cryptoassetssubledger.com
-#gateway: crypto-assets-subledger-aws-gateway.dev.svc.cluster.local
+clusterDomain: cryptoassetssubledger.com
+gateway: crypto-assets-subledger-aws-gateway.dev.svc.cluster.local
 #
 # Default Domain
-clusterDomain: af4cba2.kyma.ondemand.com
-gateway: kyma-gateway.kyma-system.svc.cluster.local
+# clusterDomain: af4cba2.kyma.ondemand.com
+# gateway: kyma-gateway.kyma-system.svc.cluster.local
 #
 apiRuleGroup: gateway.kyma-project.io
 apiRuleVersion: v1beta1

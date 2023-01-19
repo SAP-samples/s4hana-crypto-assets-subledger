@@ -95,6 +95,9 @@ app.get('/srvx/info', function (req, res) {
     }
 });
 
+//Setup Routes
+var router = require("./router")(app, server);
+
 const port = process.env.PORT || 5003;
 server.on("request", app);
 server.listen(port, function () {

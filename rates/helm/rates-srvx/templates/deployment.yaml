@@ -39,7 +39,12 @@ spec:
             - name: rates-uaa
               mountPath: "/bindings/rates-uaa"
               readOnly: true
+#            - name: crypto-rates-service-db
+#              mountPath: "/usr/src/app/srv/data"
       volumes:
         - name: rates-uaa
           secret:
             secretName: {{ .Values.services.uaa.bindingSecretName }}
+#        - name: crypto-rates-service-db
+#          persistentVolumeClaim:
+#            claimName: crypto-rates-service-data

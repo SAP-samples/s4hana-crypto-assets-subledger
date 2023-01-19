@@ -1,0 +1,10 @@
+services:
+  zzzz:
+    name: rates-zzzz
+    image:
+      repository: rates-zzzz
+      tag: "latest"
+      pullPolicy: Always
+      port: 999
+    service:
+      port: 999

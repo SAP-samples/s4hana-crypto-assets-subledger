@@ -1,0 +1,3 @@
+services:
+ - name: service3
+   url: https://service3.microservice.net

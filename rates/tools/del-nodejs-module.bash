@@ -1,31 +1,35 @@
 #!/bin/bash
+source $(dirname "$0")/config.sh
 runit=false
 
-echo "param: $1"
+# echo "param: $1"
 
-replace="sed -I '' -e"
-replacebak="sed -I '.bak' -e"
-projectName='rates'
-projectName=$(cat .yo-rc.json | jq -r '.["generator-saphanaacademy-saas"].projectName')
-# moduleName='xyox'
-moduleName='yyoy'
-dockerID='alunde'
-dockerID=$(cat .yo-rc.json | jq -r '.["generator-saphanaacademy-saas"].dockerID')
-clusterDomain='af4cba2.kyma.ondemand.com'
-clusterDomain=$(cat .yo-rc.json | jq -r '.["generator-saphanaacademy-saas"].clusterDomain')
-gateway='kyma-gateway.kyma-system.svc.cluster.local'
-gateway=$(cat .yo-rc.json | jq -r '.["generator-saphanaacademy-saas"].gateway')
+if [ "$#" -ge "1" ]; then
+  MODULENAME=$1
+fi
 
-echo "projectName: "$projectName
-echo "dockerID: "$dockerID
-echo "clusterDomain: "$clusterDomain
-echo "gateway: "$gateway
-echo "new moduleName will be: "$moduleName
+FILE=$(dirname "$0")/.yo-rc.json
+if [ -f "$FILE" ]; then
+  PROJECTNAME=$(cat .yo-rc.json | jq -r '.["generator-saphanaacademy-saas"].projectName')
+  DOCKER_ID=$(cat .yo-rc.json | jq -r '.["generator-saphanaacademy-saas"].dockerID')
+  CLUSTER_DOMAIN=$(cat .yo-rc.json | jq -r '.["generator-saphanaacademy-saas"].clusterDomain')
+  GATEWAY=$(cat .yo-rc.json | jq -r '.["generator-saphanaacademy-saas"].gateway')
+fi
 
-if [ "$1" = "dryrun" ] ; then
+echo "projectName: "${PROJECTNAME}
+echo "dockerID: "${DOCKER_ID}
+echo "clusterDomain: "${CLUSTER_DOMAIN}
+echo "gateway: "${GATEWAY}
+echo "moduleName to be deleted: "${MODULENAME}
+
+if [ "$#" -ge "2" ]; then
+ if [ "$2" = "dryrun" ] ; then
     runit=false
-else
+  else
     runit=true
+  fi
+else
+  runit=true
 fi
 
 if [ "$runit" = true ] ; then
@@ -49,16 +53,16 @@ if [ $yn == "y" ]; then
 
 echo ""
 
-cmd='rm -rf '$moduleName
+cmd='rm -rf '${MODULENAME}
 exec_or_dump "$cmd"
 
 cmd='rm -f helm-common/values.yaml.modx'
 exec_or_dump "$cmd"
 
-cmd='rm -rf helm/'$projectName'-'$moduleName
+cmd='rm -rf helm/'${PROJECTNAME}'-'${MODULENAME}
 exec_or_dump "$cmd"
 
-cmd='rm -f helm/'$projectName'-app/templates/configmap.yaml.modx'
+cmd='rm -f helm/'${PROJECTNAME}'-app/templates/configmap.yaml.modx'
 exec_or_dump "$cmd"
 
 cmd='rm -rf app/xs-app.json.modx'

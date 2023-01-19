@@ -1,0 +1,40 @@
+#!/bin/bash
+input="vals.yaml"
+projname="rates"
+modname="zzzz"
+port="9999"
+
+if [ $# -gt 0 ]
+then
+  input=$1
+  if [ $# -gt 1 ]
+  then
+    projname=$2
+    if [ $# -gt 2 ]
+    then
+      modname=$3
+      if [ $# -gt 3 ]
+      then
+        port=$4
+      fi
+    fi
+  fi
+fi
+
+while IFS= read -r line
+do
+  if [[ $line == "  uaa:" ]] 
+  then
+    #echo "Found!"
+    echo "  "$modname":"
+    echo "    name: "$projname"-"$modname
+    echo "    image:"
+    echo "      repository: "$projname"-"$modname
+    echo "      tag: "'"latest"'
+    echo "      pullPolicy: Always"
+    echo "      port: "$port
+    echo "    service:"
+    echo "      port: "$port
+  fi
+  echo "$line"
+done < $input

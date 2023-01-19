@@ -25,9 +25,9 @@
             "destination": "srvjs"
         },
         {
-            "source": "^/xyox/(.*)$",
+            "source": "^/srvx/(.*)$",
             "authenticationType": "xsuaa",
-           "destination": "xyox"
+           "destination": "srvx"
         },
         {
             "source": "^/(.*)",

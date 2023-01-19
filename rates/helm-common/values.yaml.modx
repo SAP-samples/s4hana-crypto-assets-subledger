@@ -40,10 +40,10 @@ services:
       port: 5002
     service:
       port: 5002
-  zzoz:
-    name: rates-zzoz
+  xyox:
+    name: rates-xyox
     image:
-      repository: rates-zzoz
+      repository: rates-xyox
       tag: "latest"
       pullPolicy: Always
       port: 5003

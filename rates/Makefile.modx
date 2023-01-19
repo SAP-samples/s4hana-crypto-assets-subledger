@@ -2,30 +2,30 @@ build-srv:
 	docker build --platform amd64 -t alunde/projx-srv:latest -f srv/Dockerfile .
 build-srvjs:
 	docker build --platform amd64 -t alunde/projx-srvjs:latest -f srvjs/Dockerfile .
-build-zzoz:
-	docker build --platform amd64 -t alunde/rates-zzoz:latest -f zzoz/Dockerfile .
+build-xyox:
+	docker build --platform amd64 -t alunde/rates-xyox:latest -f xyox/Dockerfile .
 # XX_Make_Build : insert lines before
 build-app:
 	docker build --platform amd64 -t alunde/projx-app:latest -f app/Dockerfile .
 
 # XX_Make_Push : insert inline prior to build-app
-docker-push: build-srv build-srvjs build-zzoz build-app
+docker-push: build-srv build-srvjs build-xyox build-app
 	docker push alunde/projx-srv:latest
 	docker push alunde/projx-srvjs:latest
-	docker push alunde/rates-zzoz:latest
+	docker push alunde/rates-xyox:latest
 # XX_Make_Push : insert line before
 	docker push alunde/projx-app:latest
 
 helm-deploy:
 	helm upgrade -n dev -f helm-common/values.yaml -i projx-srv helm/projx-srv --install
 	helm upgrade -n dev -f helm-common/values.yaml -i projx-srvjs helm/projx-srvjs --install
-	helm upgrade -n dev -f helm-common/values.yaml -i rates-zzoz helm/rates-zzoz --install
+	helm upgrade -n dev -f helm-common/values.yaml -i rates-xyox helm/rates-xyox --install
 # XX_HELM_Deploy : insert line before
 	helm upgrade -n dev -f helm-common/values.yaml -i projx-app helm/projx-app --install
 
 helm-undeploy:
 	helm uninstall -n dev projx-app
 # XX_HELM_UnDeploy : insert line after
-	helm uninstall -n dev rates-zzoz
+	helm uninstall -n dev rates-xyox
 	helm uninstall -n dev projx-srvjs
 	helm uninstall -n dev projx-srv

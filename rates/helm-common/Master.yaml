@@ -1,0 +1,5 @@
+services:
+ - name: service1
+   url: https://service1.microservice.net
+ - name: service2
+   url: https://service2.microservice.net

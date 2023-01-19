@@ -31,37 +31,8 @@ services:
       port: 5001
     service:
       port: 5001
-  srvjs:
-    name: rates-srvjs
-    image:
-      repository: rates-srvjs
-      tag: "latest"
-      pullPolicy: Always
-      port: 5002
-    service:
-      port: 5002
-  srvx:
-    name: rates-srvx
-    image:
-      repository: rates-srvx
-      tag: "latest"
-      pullPolicy: Always
-      port: 5003
-    service:
-      port: 5003
   uaa:
     name: rates-uaa
     xsappname: rates
     bindingName: rates-uaa-binding
     bindingSecretName: rates-uaa-binding-secret
-  registry:
-    name: rates-registry
-    bindingName: rates-registry-binding
-    bindingSecretName: rates-registry-binding-secret
-  role:
-    name: rates-role
-    bindingName: rates-role-binding
-  dest:
-    name: rates-dest
-    bindingName: rates-dest-binding
-    bindingSecretName: rates-dest-binding-secret

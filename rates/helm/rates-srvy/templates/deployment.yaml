@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.services.zzoz.name }}
+  name: {{ .Values.services.srvy.name }}
   labels:
     {{- include "app.labels" . | nindent 4 }}
-    app: {{ .Values.services.zzoz.name }}
+    app: {{ .Values.services.srvy.name }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ .Values.services.zzoz.name }}
+      app: {{ .Values.services.srvy.name }}
   template:
     metadata:
       labels:
-        app: {{ .Values.services.zzoz.name }}
+        app: {{ .Values.services.srvy.name }}
     spec:
       containers:
-        - image: "{{ .Values.dockerID }}/{{ .Values.services.zzoz.image.repository }}:{{ .Values.services.zzoz.image.tag }}"
-          name: {{ .Values.services.zzoz.name }}
-          imagePullPolicy: {{ .Values.services.zzoz.image.pullPolicy }}
+        - image: "{{ .Values.dockerID }}/{{ .Values.services.srvy.image.repository }}:{{ .Values.services.srvy.image.tag }}"
+          name: {{ .Values.services.srvy.name }}
+          imagePullPolicy: {{ .Values.services.srvy.image.pullPolicy }}
           resources:
             limits:
               memory: 512Mi
@@ -28,10 +28,10 @@ spec:
               cpu: "0.2"
           ports:
             - name: http
-              containerPort: {{ .Values.services.zzoz.image.port }}
+              containerPort: {{ .Values.services.srvy.image.port }}
           envFrom:
             - configMapRef:
-                name: {{ .Values.services.zzoz.name }}
+                name: {{ .Values.services.srvy.name }}
           env:
             - name: SERVICE_BINDING_ROOT
               value: /bindings

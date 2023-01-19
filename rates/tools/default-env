@@ -1,0 +1,17 @@
+#!/bin/bash
+
+
+echo '  
+{  
+  "PORT": "8001",  
+  "NODE_ENV": "production",  
+  "VCAP_SERVICES":  {
+  "xsuaa": '  > default-env.json 
+
+kubectl get secret rates-uaa-binding-secret -o json | jq -r '.data|map_values(@base64d) | { "xsuaa": [{"credentials": . , "instance_guid": .instance_guid, "instance_name": .instance_name, "label": .label, "plan": .plan, "tags": [.label], "volume_mounts": []}] }' | jq '.xsuaa' >> default-env.json
+
+echo '  
+   }
+}  
+' >> default-env.json 
+

@@ -1,0 +1,9 @@
+REPLACE="sed -I '' -e"
+REPLACEBAK="sed -I '.bak' -e"
+PROJECTNAME='rates'
+MODULENAME='xyox'
+# MODULENAME='yyoy'
+MOD/ULENAME='zzoz'
+DOCKER_ID='alunde'
+CLUSTER_DOMAIN='af4cba2.kyma.ondemand.com'
+GATEWAY='kyma-gateway.kyma-system.svc.cluster.local'

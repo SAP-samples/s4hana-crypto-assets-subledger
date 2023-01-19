@@ -1,0 +1,25 @@
+# log.yaml
+timestamp: 1620197250
+user: root
+log:
+  level: fatal
+  message: |
+    Application exited with code 2
+---
+# user.yaml
+user:
+  name: John
+  surname: Smith
+  gender: male
+  active: true
+  addresses:
+    - street: "Oxford Street"
+      city: London
+      country: England
+    - street: "Ludwigstrasse"
+      city: Munich
+      country: Germany
+  orders:
+    - 4356436
+    - 4345753
+    - 2345234

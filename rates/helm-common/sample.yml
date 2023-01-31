@@ -1,8 +1,0 @@
-myArray:
-  - a: apple
-    b: appleB
-  - a: kiwi
-    b: kiwiB
-  - a: banana
-    b: bananaB
-something: else

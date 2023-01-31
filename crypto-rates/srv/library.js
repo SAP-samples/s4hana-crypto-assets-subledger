@@ -37,6 +37,7 @@ async function createRoute(subscribedSubdomain, appName) {
             },
             spec: {
                 gateway: process.env.gateway,
+                host: tenantHost + '.' + process.env.clusterDomain,
                 rules: [
                     {
                         path: '/.*',
@@ -57,17 +58,16 @@ async function createRoute(subscribedSubdomain, appName) {
                             }
                         ],
                         methods: [
+                            'HEAD',
                             'GET',
                             'POST',
                             'PUT',
                             'PATCH',
-                            'DELETE',
-                            'HEAD',
+                            'DELETE'
                         ]
                     }
                 ],
                 service: {
-                    host: tenantHost + '.' + process.env.clusterDomain,
                     name: process.env.appServiceName,
                     port: parseInt(process.env.appServicePort)
                 }

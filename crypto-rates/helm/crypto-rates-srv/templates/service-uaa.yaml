@@ -1,4 +1,4 @@
-apiVersion: services.cloud.sap.com/v1alpha1
+apiVersion: services.cloud.sap.com/v1
 kind: ServiceInstance
 metadata:
   name: '{{ .Values.services.uaa.name }}'
@@ -18,10 +18,6 @@ spec:
           - $XSAPPNAME(application,sap-provisioning,tenant-onboarding)
       - name: $XSAPPNAME.User
         description: User
-      - name: $XSAPPNAME.Monitor
-        description: Monitor
-      - name: $XSAPPNAME.Config
-        description: Config
       - name: $XSAPPNAME.Admin
         description: Admin
     role-templates:
@@ -29,14 +25,6 @@ spec:
         description: User
         scope-references:
           - $XSAPPNAME.User
-      - name: Monitor
-        description: Monitor
-        scope-references:
-          - $XSAPPNAME.Monitor
-      - name: Config
-        description: Config
-        scope-references:
-          - $XSAPPNAME.Config
       - name: Admin
         description: Admin
         scope-references:
@@ -46,14 +34,6 @@ spec:
         description: '{{ .Values.services.uaa.xsappname }} User'
         role-template-references:
           - $XSAPPNAME.User
-      - name: '{{ .Values.services.uaa.xsappname }}_Monitor'
-        description: '{{ .Values.services.uaa.xsappname }} Monitor'
-        role-template-references:
-          - $XSAPPNAME.Monitor
-      - name: '{{ .Values.services.uaa.xsappname }}_Config'
-        description: '{{ .Values.services.uaa.xsappname }} Config'
-        role-template-references:
-          - $XSAPPNAME.Config
       - name: '{{ .Values.services.uaa.xsappname }}_Admin'
         description: '{{ .Values.services.uaa.xsappname }} Admin'
         role-template-references:

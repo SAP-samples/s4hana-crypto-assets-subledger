@@ -7,9 +7,11 @@ metadata:
     app: {{ .Values.services.app.name }}
 spec:
   ports:
-    - port: {{ .Values.services.app.service.port }}
+    - name: http
+      port: {{ .Values.services.app.service.port }}
       targetPort: {{ .Values.services.app.image.port }}
       protocol: TCP
-      name: http
   selector:
     app: {{ .Values.services.app.name }}
+status:
+  loadBalancer: {}

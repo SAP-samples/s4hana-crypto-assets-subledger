@@ -1,24 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.services.srv.name }}
+  name: {{ .Values.services.sqlite.name }}
   labels:
     {{- include "app.labels" . | nindent 4 }}
-    app: {{ .Values.services.srv.name }}
+    app: {{ .Values.services.sqlite.name }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ .Values.services.srv.name }}
+      app: {{ .Values.services.sqlite.name }}
   template:
     metadata:
       labels:
-        app: {{ .Values.services.srv.name }}
+        app: {{ .Values.services.sqlite.name }}
     spec:
+      securityContext:
+        fsGroup: 1000
       containers:
-        - image: "{{ .Values.dockerID }}/{{ .Values.services.srv.image.repository }}:{{ .Values.services.srv.image.tag }}"
-          name: {{ .Values.services.srv.name }}
-          imagePullPolicy: {{ .Values.services.srv.image.pullPolicy }}
+        - image: "{{ .Values.dockerID }}/{{ .Values.services.sqlite.image.repository }}:{{ .Values.services.sqlite.image.tag }}"
+          name: {{ .Values.services.sqlite.name }}
+          imagePullPolicy: {{ .Values.services.sqlite.image.pullPolicy }}
           resources:
             limits:
               memory: 512Mi
@@ -28,10 +30,10 @@ spec:
               cpu: "0.2"
           ports:
             - name: http
-              containerPort: {{ .Values.services.srv.image.port }}
+              containerPort: {{ .Values.services.sqlite.image.port }}
           envFrom:
             - configMapRef:
-                name: {{ .Values.services.srv.name }}
+                name: {{ .Values.services.sqlite.name }}
           env:
             - name: SERVICE_BINDING_ROOT
               value: /bindings
@@ -45,6 +47,8 @@ spec:
             - name: crypto-rates-dest
               mountPath: "/bindings/crypto-rates-dest"
               readOnly: true
+            - name: crypto-rates-service-db
+              mountPath: "/app/data"
       volumes:
         - name: crypto-rates-uaa
           secret:
@@ -55,3 +59,6 @@ spec:
         - name: crypto-rates-dest
           secret:
             secretName: {{ .Values.services.dest.bindingSecretName }}
+        - name: crypto-rates-service-db
+          persistentVolumeClaim:
+            claimName: crypto-rates-service-data

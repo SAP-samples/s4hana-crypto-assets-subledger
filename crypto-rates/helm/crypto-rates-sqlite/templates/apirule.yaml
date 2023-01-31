@@ -1,10 +1,10 @@
 apiVersion: gateway.kyma-project.io/v1beta1
 kind: APIRule
 metadata:
-  name: {{ .Values.services.srv.name }}
+  name: {{ .Values.services.sqlite.name }}
 spec:
   gateway: {{ .Values.gateway }}
-  host: {{ .Values.services.srv.name }}.{{ .Values.clusterDomain }}
+  host: {{ .Values.services.sqlite.name }}.{{ .Values.clusterDomain }}
   rules:
     - path: /.*
       accessStrategies:
@@ -18,5 +18,5 @@ spec:
         - PATCH
         - DELETE
   service:
-    name: {{ .Values.services.srv.name }}
-    port: {{ .Values.services.srv.service.port }}
+    name: {{ .Values.services.sqlite.name }}
+    port: {{ .Values.services.sqlite.service.port }}

@@ -29,15 +29,16 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.services.app.image.port }}
-          volumeMounts:
-            - name: crypto-rates-uaa
-              mountPath: "/etc/secrets/sapcp/xsuaa/crypto-rates-uaa"
-              readOnly: true
+          env:
+            - name: SERVICE_BINDING_ROOT
+              value: /bindings
           envFrom:
             - configMapRef:
                 name: {{ .Values.services.app.name }}
-      imagePullSecrets:
-        - name: {{ .Values.services.app.image.imagePullSecretName }}
+          volumeMounts:
+            - name: crypto-rates-uaa
+              mountPath: "/bindings/crypto-rates-uaa"
+              readOnly: true
       volumes:
         - name: crypto-rates-uaa
           secret:

@@ -1,3 +1,0 @@
-services:
- - name: service2
-   url: https://service22.microservice.net

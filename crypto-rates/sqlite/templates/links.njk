@@ -1,0 +1,26 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>{{title}}</title>
+    <style>
+        #mainBody {
+            font-family: Tahoma, Geneva, sans-serif;
+        }
+    </style>
+
+    </head>
+    <body id="mainBody">
+            <h3>{{title}}</h3><br />
+            <table>
+            <th>Links</th>
+            {% for link in links %}
+                <tr><td><a href="{{ link.path }}">{{ link.path }}</a> {{ link.title }}</td></tr>
+            {% else %}
+                <tr><td>No Links!</td></tr>
+            {% endfor %}
+            </table>
+            <br />
+            <a href="{{ base }}/">Return to {{ base }}.</a><br />
+            <a href="/">Return to Root.</a><br />
+    </body>
+</html>

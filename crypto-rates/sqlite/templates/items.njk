@@ -1,0 +1,26 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>{{title}}</title>
+    <style>
+        #mainBody {
+            font-family: Tahoma, Geneva, sans-serif;
+        }
+    </style>
+
+    </head>
+    <body id="mainBody">
+            <h3>{{title}}</h3><br />
+            <table>
+            <th>TenantID</th>
+            {% for item in items %}
+                <tr><td>{{ item.id }}: <a href="/tenant/{{ item.name }}">{{ item.name }}</a> created {{ item.time }}</td></tr>
+            {% else %}
+                <tr><td>No Items!</td></tr>
+            {% endfor %}
+            </table>
+            <br />
+            <a href="{{ base }}/">Return to {{ base }}.</a><br />
+            <a href="/">Return to Root.</a><br />
+    </body>
+</html>

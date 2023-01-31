@@ -1,0 +1,31 @@
+{
+    "name": "crypto-rates-sqlite",
+    "dependencies": {
+        "express": "latest",
+
+
+        "axios": "latest",
+
+
+        "@kubernetes/client-node": "latest",
+
+
+        "@sap-cloud-sdk/http-client": "latest",
+
+
+        "@sap-cloud-sdk/connectivity": "latest",
+
+        "@sap/xsenv": "latest",
+        "@sap/xssec": "latest",
+        "passport": "latest",
+        "nodemon": "latest",
+
+        "better-sqlite3": "latest",
+
+        "nunjucks": "latest"
+    },
+    "scripts": {
+        "debug": "nodemon -e js,njk server.js",
+        "start": "node server.js"
+    }
+}

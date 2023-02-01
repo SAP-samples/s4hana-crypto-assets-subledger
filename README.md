@@ -17,7 +17,7 @@ For a more detailed description, please consult the project's [Wiki](https://git
 
  - A productive cloud instance or SAP S/4HANA on-premise instance.
  - A functional grasp of the ABAP development language and tools.
- - A functional grasp of GAAP accounting principles and practices.
+ - A functional grasp of GAAP accounting principles and practices...
 
 
 ## Download and Installation

@@ -3,5 +3,5 @@
 
 module.exports = (app, server) => {
 	app.use("/sqlite", require("./routes/sqlite")());
-	// app.use("/adm", require("./routes/adm")());
+	app.use("/admin", require("./routes/admin")());
 };

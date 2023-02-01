@@ -9,6 +9,12 @@
             "destination": "srv"
         },
         {
+            "source": "^/admin/(.*)$",
+            "authenticationType": "xsuaa",
+            "scope": "$XSAPPNAME.Admin",
+            "destination": "sqlite"
+        },
+        {
             "source": "^/sqlite/(.*)$",
             "authenticationType": "none",
             "destination": "sqlite"

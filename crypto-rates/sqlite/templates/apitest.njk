@@ -1,0 +1,569 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv='Content-Type' content='text/html;charset=UTF-8' />
+<title>web</title>
+<style>
+#canvasSimpleDiv {
+	/*border:dashed 1px #557755;*/
+	cursor:wait;
+	width:100px;
+	height:100px;	
+}
+
+#canvasScaledDiv {
+	/*border:dashed 1px #557755;*/
+	cursor:wait;
+	width:28px;
+	height:28px;	
+}
+
+#canvasSimple {
+	border:solid 1px #333;
+	cursor:pointer;
+	width:100px;
+	height:100px;
+}
+
+#canvasScaled {
+	border:solid 1px #333;
+	cursor:pointer;
+	width:28px;
+	height:28px;
+}
+
+
+.clearCanvasLink {
+	text-decoration:underline;
+	cursor:pointer;
+}
+</style>
+<script>
+(function () {
+	var onWindowLoad = function () {
+		
+		var loadScript = function (src, callback) {
+		
+			var element = document.createElement("script");
+				element.src = src;
+				element.async = true;
+				document.body.appendChild(element);
+				
+				if (callback) {
+				
+					element.onreadystatechange = function () {
+						if (this.readyState === "loaded" || this.readyState === "complete") { 
+							callback();
+						}
+					};
+					element.onload = callback;
+				}
+		},
+		
+		loadArticleScript = function () {
+			prepareSimpleCanvas();
+			prepareScaledCanvas();
+		};
+		loadScript("https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js", loadArticleScript);
+	};
+
+	if (window.addEventListener) {
+		window.addEventListener("load", onWindowLoad, false);
+	} else if (window.attachEvent) {
+		window.attachEvent("onload", onWindowLoad);
+	} else {
+		window.onload = onWindowLoad;
+	}
+}());			
+</script>
+
+<script>
+
+
+function randomIntFromInterval(min,max)
+{
+    return Math.floor(Math.random()*(max-min+1)+min);
+}
+var request_output = "";
+
+var xhr = new XMLHttpRequest();
+xhr.open('POST', '{{base}}/{{path}}');
+request_output += "POST to {{base}}/{{path}} \n";
+xhr.setRequestHeader('Content-Type', 'application/json');
+request_output += "Request Header: Content-Type = application/json \n";
+xhr.setRequestHeader('Accept', 'application/json');
+request_output += "Request Header: Accept = application/json \n";
+
+request_output += "\n";
+request_output += "Request Body: \n";
+
+function dumpResponseHeaders(xhr_obj) {
+    var hdr_out = "";
+    hdr_out += "Response Headers\n";
+    hdr_out += "\n";
+    var headers = xhr_obj.getAllResponseHeaders();
+    return (hdr_out + headers + "\n");
+}
+xhr.onload = function() {
+    if (xhr.status === 201) {
+        document.getElementById("response_content").innerHTML = "<pre>\n" + dumpResponseHeaders(xhr) + "Response Body: \n" + JSON.stringify(JSON.parse(xhr.responseText), null, 2) + "</pre>\n";
+    }
+    else {
+        alert("Yipe!  Got status " + xhr.status + " : " + xhr.statusText + " ::\n " + JSON.parse(xhr.responseText).error.message.value + " \n:: expected 201.");
+    }
+};
+
+var request_obj = 
+{
+   "numberTarget": 0,
+   "numberData": "0,0,255,0"
+};
+
+</script>
+
+</head>
+<body style="font-family: Tahoma, Geneva, sans-serif">
+<strong>{{title}}</strong><br />
+<br />
+<a href="{{docs}}" target="docs">Docs Link</a><br />
+<p>Click this <button id="clearTraining" type="button">Clear Training</button> button to start over.</p>
+
+<table border="0" cellspacing="1" cellpadding="2">
+<tr><th align="right">Name</th><th>Description</th></tr>
+{% for input in inputs %}
+    <tr><td align="right" valign="bottom">{{ input.name }}</td><td>{{ input.desc }}<br /><input type="{{ input.type }}" id="{{ input.id }}" name="{{ input.id }}" value="{{ input.default }}" size={{ input.size }}></td><tr>
+{% else %}
+    <tr><td colspan=2>No Inputs!</td></tr>
+{% endfor %}
+<tr><td align="right">&nbsp;</td><td><button id="mockPost" type="button">Mock Post</button></td><tr>
+</table>
+
+<script type="text/javascript">
+
+var canvas;
+var context;
+var canvasWidth = 100;
+var canvasHeight = 100;
+var scaledWidth = 28;
+var scaledHeight = 28;
+var padding = 25;
+var lineWidth = 8;
+var colorBlack = "#000000";
+var colorPurple = "#cb3594";
+var colorGreen = "#659b41";
+var colorYellow = "#ffcf33";
+var colorBrown = "#986928";
+var outlineImage = new Image();
+var crayonImage = new Image();
+var markerImage = new Image();
+var eraserImage = new Image();
+var crayonBackgroundImage = new Image();
+var markerBackgroundImage = new Image();
+var eraserBackgroundImage = new Image();
+var crayonTextureImage = new Image();
+var clickX = new Array();
+var clickY = new Array();
+var clickColor = new Array();
+var clickTool = new Array();
+var clickSize = new Array();
+var clickDrag = new Array();
+var paint = false;
+var curColor = colorPurple;
+var curTool = "crayon";
+var curSize = "normal";
+var mediumStartX = 18;
+var mediumStartY = 19;
+var mediumImageWidth = 93;
+var mediumImageHeight = 46;
+var drawingAreaX = 111;
+var drawingAreaY = 11;
+var drawingAreaWidth = 267;
+var drawingAreaHeight = 200;
+var toolHotspotStartY = 23;
+var toolHotspotHeight = 38;
+var sizeHotspotStartY = 157;
+var sizeHotspotHeight = 36;
+var sizeHotspotWidthObject = new Object();
+sizeHotspotWidthObject.huge = 39;
+sizeHotspotWidthObject.large = 25;
+sizeHotspotWidthObject.normal = 18;
+sizeHotspotWidthObject.small = 16;
+
+/****************************************************************************** Simple Canvas */
+
+var clickX_simple = new Array();
+var clickY_simple = new Array();
+var clickDrag_simple = new Array();
+var paint_simple;
+var canvas_simple;
+var context_simple;
+var canvas_scaled;
+var context_scaled;
+/**
+* Creates a canvas element.
+*/
+
+function sendClearTraining()
+{
+
+		clearCanvas_scaled();
+		clearCanvas_simple();
+
+		request_obj = 
+		{
+		   "action": "clearTraining"
+	   	};
+	
+		xhr = new XMLHttpRequest();
+		xhr.open('POST', '{{base}}/{{path}}');
+		xhr.setRequestHeader('Content-Type', 'application/json');
+		xhr.setRequestHeader('Accept', 'application/json');
+
+		xhr.onload = function() {
+		    if (xhr.status === 201) {
+		        document.getElementById("response_content").innerHTML = "<pre>\n" + dumpResponseHeaders(xhr) + "Response Body: \n" + JSON.stringify(JSON.parse(xhr.responseText), null, 2) + "</pre>\n";
+
+		        document.getElementById("numTrainingImages").innerHTML = "00";
+		        document.getElementById("training_secs_msg").innerHTML = "Training images have been cleared.";
+		        document.getElementById("predict_secs_msg").innerHTML = "";
+		        document.getElementById("predict_target").innerHTML = "?";
+
+		    }
+		    else {
+		        alert("Yipe!  Got status " + xhr.status + " : " + xhr.statusText + " ::\n " + JSON.parse(xhr.responseText).error.message.value + " \n:: expected 201.");
+		    }
+		};
+
+		xhr.send(JSON.stringify(request_obj));
+
+}
+
+function prepareAndSend(whatnum)
+{
+		clickX_simple = new Array();
+		clickY_simple = new Array();
+		clickDrag_simple = new Array();
+
+		clearCanvas_scaled();
+		
+		document.getElementById("training_secs_msg").innerHTML = "Fitting of Training Data Time: 0.0000000000000000 seconds";
+	      	document.getElementById("predict_secs_msg").innerHTML = "Predicting of Test Data Time: 0.0000000000000000 seconds";
+        	document.getElementById("predict_target").innerHTML = "?";
+
+		context_scaled.drawImage(canvas_simple, 0, 0, scaledWidth, scaledHeight);
+		
+		var imgData = context_scaled.getImageData(0, 0, scaledWidth, scaledHeight);
+		// Need to stuff imgData into HANA!
+		// Probably via a POST to the Python Module.
+		
+		// imgData.data is 784 x 4 bytes.
+		// Need to convert the 4 bytes to an small int 0-255
+		
+		// For every pixel in an ImageData object there are four pieces of information, the RGBA values:
+
+		// R - The color red (from 0-255)
+		// G - The color green (from 0-255)
+		// B - The color blue (from 0-255)
+		// A - The alpha channel (from 0-255; 0 is transparent and 255 is fully visible)
+		
+		// The color/alpha information is held in an array, and is stored in the data property of the ImageData object.
+
+		// Looks like we can just take every 4th byte and call that it.
+
+		Number.prototype.pad = function(size) {
+				  var s = String(this);
+				    while (s.length < (size || 2)) {s = "0" + s;}
+					  return s;
+		}
+
+		request_obj = 
+		{
+		   "numberTarget": whatnum,
+		   "numberData": []
+	   	};
+		
+		var idx;
+		var num;
+		var numtxt = "";
+
+		for (idx = 0; idx < imgData.data.length; idx += 4) {
+			num = imgData.data[idx+3];
+			request_obj.numberData.push(num);
+
+			if (num > 0) {
+				numtxt += num.pad(3);
+			}
+			else {
+				numtxt += "...";
+			}
+
+			if ((idx + 4) % (28 * 4)) {
+				numtxt += "";
+			}
+			else {
+				numtxt += "\n";
+			}
+		}
+
+		document.getElementById("imagetext").innerHTML = "<pre>\n" + "NumberText" + "\n" + numtxt + "</pre>\n";
+
+		// document.getElementById("request_content").innerHTML = "<pre>\n" + request_output + "\n" + JSON.stringify(request_obj, null, 2) + "</pre>\n";
+		document.getElementById("request_content").innerHTML = "<pre>\n" + request_output + "\n" + "suppressed..." + "</pre>\n";
+
+		xhr = new XMLHttpRequest();
+		xhr.open('POST', '{{base}}/{{path}}');
+		xhr.setRequestHeader('Content-Type', 'application/json');
+		xhr.setRequestHeader('Accept', 'application/json');
+
+		xhr.onload = function() {
+		    if (xhr.status === 201) {
+		        document.getElementById("response_content").innerHTML = "<pre>\n" + dumpResponseHeaders(xhr) + "Response Body: \n" + JSON.stringify(JSON.parse(xhr.responseText), null, 2) + "</pre>\n";
+
+			responseJSON = JSON.parse(xhr.responseText);
+		        document.getElementById("numTrainingImages").innerHTML = responseJSON.num_training_images;
+		        document.getElementById("training_secs_msg").innerHTML = responseJSON.training_secs_msg;
+			if (typeof(responseJSON.predict_secs_msg) != "undefined") {
+		        	document.getElementById("predict_secs_msg").innerHTML = responseJSON.predict_secs_msg;
+			}
+			if (typeof(responseJSON.predict_target) != "undefined") {
+		        	document.getElementById("predict_target").innerHTML = responseJSON.predict_target;
+			}
+		    }
+		    else {
+		        alert("Yipe!  Got status " + xhr.status + " : " + xhr.statusText + " ::\n " + JSON.parse(xhr.responseText).error.message.value + " \n:: expected 201.");
+		    }
+		};
+
+		xhr.send(JSON.stringify(request_obj));
+
+		//xhr.close();
+		
+		clearCanvas_simple();
+	
+}
+
+function prepareSimpleCanvas()
+{
+	// Create the canvas (Neccessary for IE because it doesn't know what a canvas element is)
+	var canvasDiv = document.getElementById('canvasSimpleDiv');
+	canvas_simple = document.createElement('canvas');
+	canvas_simple.setAttribute('width', canvasWidth);
+	canvas_simple.setAttribute('height', canvasHeight);
+	canvas_simple.setAttribute('id', 'canvasSimple');
+	canvasDiv.appendChild(canvas_simple);
+	if(typeof G_vmlCanvasManager != 'undefined') {
+		canvas_simple = G_vmlCanvasManager.initElement(canvas_simple);
+	}
+	context_simple = canvas_simple.getContext("2d");
+	
+	// Add mouse events
+	// ----------------
+	$('#canvasSimple').mousedown(function(e)
+	{
+		// Mouse down location
+		var mouseX = e.pageX - this.offsetLeft;
+		var mouseY = e.pageY - this.offsetTop;
+		
+		paint_simple = true;
+		addClickSimple(mouseX, mouseY, false);
+		redrawSimple();
+	});
+	
+	$('#canvasSimple').mousemove(function(e){
+		if(paint_simple){
+			addClickSimple(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
+			redrawSimple();
+		}
+	});
+	
+	$('#canvasSimple').mouseup(function(e){
+		paint_simple = false;
+	  	redrawSimple();
+	});
+	
+	$('#canvasSimple').mouseleave(function(e){
+		paint_simple = false;
+	});
+	
+	$('#send0').mousedown(function(e) { prepareAndSend("0") });
+
+	$('#send1').mousedown(function(e) { prepareAndSend("1") });
+
+	$('#send2').mousedown(function(e) { prepareAndSend("2") });
+
+	$('#send3').mousedown(function(e) { prepareAndSend("3") });
+
+	$('#send4').mousedown(function(e) { prepareAndSend("4") });
+
+	$('#send5').mousedown(function(e) { prepareAndSend("5") });
+
+	$('#send6').mousedown(function(e) { prepareAndSend("6") });
+
+	$('#send7').mousedown(function(e) { prepareAndSend("7") });
+
+	$('#send8').mousedown(function(e) { prepareAndSend("8") });
+
+	$('#send9').mousedown(function(e) { prepareAndSend("9") });
+
+	$('#clearTraining').mousedown(function(e) { sendClearTraining() });
+
+	$('#clearCanvasSimple').mousedown(function(e)
+	{
+		clickX_simple = new Array();
+		clickY_simple = new Array();
+		clickDrag_simple = new Array();
+
+		clearCanvas_scaled();
+		
+		clearCanvas_simple();
+
+		document.getElementById("training_secs_msg").innerHTML = "";
+	      	document.getElementById("predict_secs_msg").innerHTML = "";
+        	document.getElementById("predict_target").innerHTML = "?";
+	});
+	
+	// Add touch event listeners to canvas element
+	canvas_simple.addEventListener("touchstart", function(e)
+	{
+		// Mouse down location
+		var mouseX = (e.changedTouches ? e.changedTouches[0].pageX : e.pageX) - this.offsetLeft,
+			mouseY = (e.changedTouches ? e.changedTouches[0].pageY : e.pageY) - this.offsetTop;
+		
+		paint_simple = true;
+		addClickSimple(mouseX, mouseY, false);
+		redrawSimple();
+	}, false);
+	canvas_simple.addEventListener("touchmove", function(e){
+		
+		var mouseX = (e.changedTouches ? e.changedTouches[0].pageX : e.pageX) - this.offsetLeft,
+			mouseY = (e.changedTouches ? e.changedTouches[0].pageY : e.pageY) - this.offsetTop;
+					
+		if(paint_simple){
+			addClickSimple(mouseX, mouseY, true);
+			redrawSimple();
+		}
+		e.preventDefault()
+	}, false);
+	canvas_simple.addEventListener("touchend", function(e){
+		paint_simple = false;
+	  	redrawSimple();
+	}, false);
+	canvas_simple.addEventListener("touchcancel", function(e){
+		paint_simple = false;
+	}, false);
+}
+
+function prepareScaledCanvas()
+{
+	// Create the canvas (Neccessary for IE because it doesn't know what a canvas element is)
+	var canvasDiv = document.getElementById('canvasScaledDiv');
+	canvas_scaled = document.createElement('canvas');
+	canvas_scaled.setAttribute('width', scaledWidth);
+	canvas_scaled.setAttribute('height', scaledHeight);
+	canvas_scaled.setAttribute('id', 'canvasScaled');
+	canvasDiv.appendChild(canvas_scaled);
+	if(typeof G_vmlCanvasManager != 'undefined') {
+		canvas_scaled = G_vmlCanvasManager.initElement(canvas_scaled);
+	}
+	context_scaled = canvas_scaled.getContext("2d");
+	
+}
+
+function addClickSimple(x, y, dragging)
+{
+	clickX_simple.push(x);
+	clickY_simple.push(y);
+	clickDrag_simple.push(dragging);
+}
+
+function clearCanvas_simple()
+{
+	context_simple.clearRect(0, 0, canvasWidth, canvasHeight);
+}
+
+function clearCanvas_scaled()
+{
+	context_scaled.clearRect(0, 0, scaledWidth, scaledHeight);
+}
+
+function redrawSimple()
+{
+	clearCanvas_simple();
+	
+	var radius = 8;
+	context_simple.strokeStyle = colorBlack;
+	context_simple.lineJoin = "round";
+	context_simple.lineWidth = radius;
+			
+	for(var i=0; i < clickX_simple.length; i++)
+	{		
+		context_simple.beginPath();
+		if(clickDrag_simple[i] && i){
+			context_simple.moveTo(clickX_simple[i-1], clickY_simple[i-1]);
+		}else{
+			context_simple.moveTo(clickX_simple[i]-1, clickY_simple[i]);
+		}
+		context_simple.lineTo(clickX_simple[i], clickY_simple[i]);
+		context_simple.closePath();
+		context_simple.stroke();
+	}
+}
+</script>
+
+
+    <p class="demoToolList">Clear the canvas: <button id="clearCanvasSimple" type="button">Clear</button></p>
+    <div class="image" style="display: inline-block; vertical-align: middle; line-height: normal;">
+	<div id="canvasSimpleDiv"></div>
+    </div>
+    <div class="image" style="display: inline-block; vertical-align: middle; line-height: normal;">
+	    <button id="send0" type="button">0</button><br />
+	    <button id="send1" type="button">1</button><br />
+	    <button id="send2" type="button">2</button><br />
+	    <button id="send3" type="button">3</button><br />
+	    <button id="send4" type="button">4</button><br />
+	    <button id="send5" type="button">5</button><br />
+	    <button id="send6" type="button">6</button><br />
+	    <button id="send7" type="button">7</button><br />
+	    <button id="send8" type="button">8</button><br />
+	    <button id="send9" type="button">9</button><br />
+    </div>
+    <div class="image" style="display: inline-block; vertical-align: middle; line-height: normal;">
+	<div id="canvasScaledDiv"></div>
+    </div>
+
+    <div class="image" style="display: inline-block; vertical-align: middle; line-height: normal;">
+	    <span id="numTrainingImages">??</span> Training Images<br />
+	    <span id="training_secs_msg">Fitting of Training Data Time:</span><br />
+	    <span id="predict_secs_msg">Predicting of Test Data Time:</span><br />
+	    Number Predicted as <span id="predict_target" style=" font-size: 2em; border: solid 2px; text-align: center; width: 1em; display: inline-block; vertical-align: middle; ">?</span><br />
+	    <br />
+	    <!-- <button id="clearTraining" type="button">Clear Training</button><br /> -->/
+    </div>
+
+    <br />
+
+	<div id="imagetext"></div>
+
+<p>===Begin Request===</p>
+<div id="request_content">
+No request sent yet.    
+</div>
+<p>===End Request===</p>
+<p>===Begin Response===</p>
+<div id="response_content">
+No results returned yet.    
+</div>
+<p>===End Response===</p>
+
+<script>
+// Display the request
+document.getElementById("request_content").innerHTML = "<pre>\n" + request_output + "\n" + JSON.stringify(request_obj, null, 2) + "</pre>\n";
+
+// Send the Ajax Request.
+//xhr.send(JSON.stringify(request_obj));
+</script>
+
+
+</body>
+</html>

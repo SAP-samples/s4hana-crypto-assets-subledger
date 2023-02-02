@@ -82,6 +82,8 @@ app.get(["/","/links"], function (req, res) {
     responseStr += "<!DOCTYPE HTML><html><head><title>Crypto Rates ADM</title></head><body><h3>Crypto Rates ADM</h3><br />";
     responseStr += "<a href=\"/sqlite/links\">SQLite Links</a> requires authorization.<br />";
     responseStr += "<a href=\"/sqlite/noauth\">SQLite NoAuth</a> no authorization.<br />";
+    responseStr += "<a href=\"/spfi/links\">SPFI Links</a> no authorization.<br />";
+    responseStr += "<a href=\"/spfi/noauth\">SPFI NoAuth</a> no authorization.<br />";
     responseStr += "<a href=\"/noauth\">NoAuth</a> no authorization.<br />";
     responseStr += "<br />";
     responseStr += "<a href=\"/\">Return to SQLite Root.</a><br />";
@@ -89,15 +91,29 @@ app.get(["/","/links"], function (req, res) {
     res.status(200).send(responseStr);
 });
 
-// Require authorization for anything further
-app.get("*", PassportAuthenticateMiddleware, function (req, res, next) {
+
+// No authorization for anything prefixed with /spfi
+app.all(["/spfi*"], function (req, res, next) {
+    var hostname = "localhost";
+
+    if (((typeof req) == "object") && ((typeof req.headers) == "object") && ((typeof req.headers['x-forwarded-host']) == "string")) {
+        hostname = req.headers['x-forwarded-host'];
+    }
+    console.log("-" + req.method + " " + hostname + req.url);
+    // console.log(util.inspect(req.authInfo, {depth: 1}));
+    next();
+});
+
+// Require authorization for anything prefixed with /admin or /sqlite
+// app.get(["^\/admin\/\/*","^\/sqlite\/\/*"], PassportAuthenticateMiddleware, function (req, res, next) {
+app.get(["/sqlite*","/admin*"], PassportAuthenticateMiddleware, function (req, res, next) {
 
     var hostname = "localhost";
 
     if (((typeof req) == "object") && ((typeof req.headers) == "object") && ((typeof req.headers['x-forwarded-host']) == "string")) {
         hostname = req.headers['x-forwarded-host'];
     }
-    console.log(req.method + " " + hostname + req.url);
+    console.log("+" + req.method + " " + hostname + req.url);
     gtid = req.authInfo.getZoneId()
     console.log("tenantId: " + gtid);
     // console.log(util.inspect(req.authInfo, {depth: 1}));

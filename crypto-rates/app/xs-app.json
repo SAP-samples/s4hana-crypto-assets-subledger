@@ -15,6 +15,11 @@
             "destination": "sqlite"
         },
         {
+            "source": "^/spfi/(.*)$",
+            "authenticationType": "none",
+            "destination": "sqlite"
+        },
+        {
             "source": "^/sqlite/(.*)$",
             "authenticationType": "none",
             "destination": "sqlite"

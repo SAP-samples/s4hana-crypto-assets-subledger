@@ -1,0 +1,72 @@
+var connection = null;
+
+function reconnect() {
+
+connection = new WebSocket("{{chatServerURL}}");
+
+connection.onopen = () => {
+    console.log("connected");
+};
+
+connection.onclose = () => {
+    console.error("disconnected");
+};
+
+connection.onerror = error => {
+    console.error("failed to connect", error);
+};
+
+connection.onmessage = event => {
+    console.log("received", event.data);
+    // let li = document.createElement("li");
+    // li.innerText = event.data;
+    // document.querySelector("#chat").append(li);
+    let nick = document.querySelector("#nick").value;
+    if (event.data.substring(2,7) == ":INV:") {
+        if (event.data.substring(0,2) == nick) {
+            alert("Invoice Sent!");
+        } else {
+            var invoice = event.data.substring(7);
+            document.getElementById("invoice").innerHTML = invoice;
+        }
+    } else {
+        var logger = document.querySelector("#logger");
+        logger.innerHTML = logger.innerHTML + "\n" + event.data;
+        logger.scrollTop = logger.scrollHeight;
+    }
+
+};
+
+document.querySelector("form").addEventListener("submit", event => {
+    event.preventDefault();
+    let nick = document.querySelector("#nick").value;
+    let message = document.querySelector("#message").value;
+    connection.send(nick + ":" + message);
+    document.querySelector("#message").value = "";
+});
+
+document.getElementById('reconnect').style.visibility = 'hidden';
+document.getElementById('disconnect').style.visibility = 'visible';
+};
+
+function disconnect() {
+    console.log("disconnecting...");
+    connection.close();
+    document.getElementById('reconnect').style.visibility = 'visible';
+    document.getElementById('disconnect').style.visibility = 'hidden';
+};
+
+document.getElementById('message').onkeydown = function(e){
+    if(e.keyCode == 13){
+        //console.log("enter key...");
+        // let addr = document.querySelector("#addr").value;
+        // let message = document.querySelector("#message").value;
+        // connection.send(nick + ":" + message);
+        // document.querySelector("#message").value = "";
+    } else {
+        //console.log("other key...");
+    }
+};
+
+reconnect();
+

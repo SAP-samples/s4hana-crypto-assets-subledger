@@ -24,6 +24,12 @@
             "destination": "sqlite"
         },
         {
+            "source": "^/socket/(.*)$",
+            "authenticationType": "none",
+            "csrfProtection": false,
+            "destination": "sqlite"
+        },
+        {
             "source": "^/sqlite/(.*)$",
             "authenticationType": "none",
             "csrfProtection": false,

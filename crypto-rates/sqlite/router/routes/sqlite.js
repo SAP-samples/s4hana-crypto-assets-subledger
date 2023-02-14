@@ -27,6 +27,7 @@ module.exports = () => {
 	});
 
 	app.get("/links", function (req, res) {
+		console.log("links!");
 		res.send(nunjucks.render('templates/links.njk', { 
 			title: "SQLite Links",
 			base: base_path,

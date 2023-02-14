@@ -1,5 +1,7 @@
 const express = require('express');
 const app = express();
+app.use(express.static('static'));
+
 var server = require("http").createServer();
 const ws = require('ws');
 
@@ -61,7 +63,7 @@ app.get("/favicon.ico", function(req, res) {
 });
 
 // app user info
-app.get(['/noauth','/sqlite','/sqlite/noauth'], function (req, res) {
+app.get(['/noauth','/sqlite','/sqlite/noauth','/socket','/socket/noauth'], function (req, res) {
     var hostname = "localhost";
 
     if (((typeof req) == "object") && ((typeof req.headers) == "object") && ((typeof req.headers['x-forwarded-host']) == "string")) {
@@ -85,6 +87,8 @@ app.get(["/","/links"], function (req, res) {
     responseStr += "<a href=\"/sqlite/noauth\">SQLite NoAuth</a> no authorization.<br />";
     responseStr += "<a href=\"/spfi/links\">SPFI Links</a> no authorization.<br />";
     responseStr += "<a href=\"/spfi/noauth\">SPFI NoAuth</a> no authorization.<br />";
+    responseStr += "<a href=\"/socket/links\">Socket Links</a> no authorization.<br />";
+    responseStr += "<a href=\"/socket/noauth\">Socket NoAuth</a> no authorization.<br />";
     responseStr += "<a href=\"/noauth\">NoAuth</a> no authorization.<br />";
     responseStr += "<br />";
     responseStr += "<a href=\"/\">Return to SQLite Root.</a><br />";
@@ -93,8 +97,8 @@ app.get(["/","/links"], function (req, res) {
 });
 
 
-// No authorization for anything prefixed with /spfi
-app.all(["/spfi*"], function (req, res, next) {
+// No authorization for anything prefixed with /spfi/ or /socket/
+app.all(["/spfi/*",'/socket','/socket/chat'], function (req, res, next) {
     var hostname = "localhost";
 
     if (((typeof req) == "object") && ((typeof req.headers) == "object") && ((typeof req.headers['x-forwarded-host']) == "string")) {
@@ -108,7 +112,7 @@ app.all(["/spfi*"], function (req, res, next) {
 // Require authorization for anything prefixed with /admin or /sqlite
 // app.get(["^\/admin\/\/*","^\/sqlite\/\/*"], PassportAuthenticateMiddleware, function (req, res, next) {
 app.get(["/sqlite*","/admin*"], PassportAuthenticateMiddleware, function (req, res, next) {
-
+    console.log("Check for Auth...");
     var hostname = "localhost";
 
     if (((typeof req) == "object") && ((typeof req.headers) == "object") && ((typeof req.headers['x-forwarded-host']) == "string")) {

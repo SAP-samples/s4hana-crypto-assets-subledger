@@ -62,3 +62,5 @@ spec:
         - name: crypto-rates-service-db
           persistentVolumeClaim:
             claimName: crypto-rates-service-data
+  strategy:
+    type: Recreate

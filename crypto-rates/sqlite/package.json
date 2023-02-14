@@ -19,8 +19,8 @@
         "@sap/xssec": "latest",
         "passport": "latest",
         "nodemon": "latest",
-
         "better-sqlite3": "latest",
+        "ws": "^7.0.1",
 
         "nunjucks": "latest"
     },

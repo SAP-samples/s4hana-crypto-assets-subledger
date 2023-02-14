@@ -1,6 +1,9 @@
 {
     "welcomeFile": "index.html",
     "authenticationMethod": "route",
+    "websockets": {
+        "enabled": true
+    },
     "routes": [
         {
             "source": "^/srv/(.*)$",
@@ -17,11 +20,13 @@
         {
             "source": "^/spfi/(.*)$",
             "authenticationType": "none",
+            "csrfProtection": false,
             "destination": "sqlite"
         },
         {
             "source": "^/sqlite/(.*)$",
             "authenticationType": "none",
+            "csrfProtection": false,
             "destination": "sqlite"
         },
         {

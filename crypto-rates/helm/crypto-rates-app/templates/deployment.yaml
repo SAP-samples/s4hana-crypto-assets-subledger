@@ -32,6 +32,8 @@ spec:
           env:
             - name: SERVICE_BINDING_ROOT
               value: /bindings
+            - name: XS_APP_LOG_LEVEL
+              value: debug
           envFrom:
             - configMapRef:
                 name: {{ .Values.services.app.name }}

@@ -8,6 +8,9 @@ build-app:
 rebuild-app:
 	docker build --platform amd64 -t alunde/crypto-rates-app:latest -f app/Dockerfile . ; docker push alunde/crypto-rates-app:latest
 
+rebuild-sqlite:
+	docker build --platform amd64 -t alunde/crypto-rates-sqlite:latest -f sqlite/Dockerfile . ; docker push alunde/crypto-rates-sqlite:latest
+
 docker-push: build-srv build-sqlite build-app
 	docker push alunde/crypto-rates-srv:latest
 	docker push alunde/crypto-rates-sqlite:latest

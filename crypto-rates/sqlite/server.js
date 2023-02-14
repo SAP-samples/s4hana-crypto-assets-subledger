@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 var server = require("http").createServer();
+const ws = require('ws');
 
 const xsenv = require('@sap/xsenv');
 xsenv.loadEnv();
@@ -60,7 +61,7 @@ app.get("/favicon.ico", function(req, res) {
 });
 
 // app user info
-app.get(['/noauth','/sqlite/noauth'], function (req, res) {
+app.get(['/noauth','/sqlite','/sqlite/noauth'], function (req, res) {
     var hostname = "localhost";
 
     if (((typeof req) == "object") && ((typeof req.headers) == "object") && ((typeof req.headers['x-forwarded-host']) == "string")) {
@@ -162,6 +163,101 @@ app.get('/sqlite/info', PassportAuthenticateMiddleware, function (req, res) {
 
 //Setup Routes
 var router = require("./router")(app, server);
+
+// Set up a headless websocket server that prints any
+// events that come in.
+const wsServer = new ws.Server({ noServer: true });
+
+var client_cnt = 0;
+
+wsServer.on('connection', socket => {
+    console.log('New Client Joining...');
+        
+    client_cnt = 0;
+    wsServer.clients.forEach(client => {
+        client_cnt++;
+    });
+    console.log('number of clients: ' + client_cnt);
+
+    socket.on('message', message => {
+        console.log('Received:' + message);
+        var is_cmd = false;
+        var parts = message.split(':');
+        if (parts.length > 1) {
+            console.log('parts: ' + JSON.stringify(parts,null,2));
+            if (parts.length > 2) {
+                if (parts[1] == "cmd") {
+                    console.log('Is Command');
+                    is_cmd = true;
+                    switch (parts[2]) {
+                        case "getnick":
+                            console.log('GetNick!!');
+                            break;
+                        case "setnick":
+                            if (parts.length > 3) {
+                                console.log('SetNick: ' + parts[3]);
+                                // Do the nickname setting logic
+                            } else {
+                                console.log('SetNick: ' + 'needs a nickname.');
+                            }
+                            break;
+                        default:
+                            console.log('Default!!');
+                    }                    
+                } else {
+                    console.log('Not Command');
+                }
+            } else {
+                console.log('Not Command');
+            }
+        } else {
+            console.log('Malformed Message');
+        }
+        if (!is_cmd) {
+            broadcast(message);
+        }
+    });
+    
+    socket.on('close', function close() {
+        console.log('Disconnected...');
+        client_cnt = 0;
+        wsServer.clients.forEach(client => {
+            client_cnt++;
+        });
+        console.log('number of clients: ' + client_cnt);    
+    });
+    
+});
+
+wsServer.on('error', error => {
+    console.log('Server Error...' + error);
+});
+
+function broadcast(data) {
+
+    var idx = 1;
+    wsServer.clients.forEach(client => {
+        // console.log("client: " + JSON.stringify(client, null, 2));
+        // console.log("client: " + idx);
+
+        if (client.readyState === ws.OPEN) {
+            client.send(data);
+        }
+        idx++;
+    });
+}
+  
+let myVar = setInterval(myTimer, (10 * 1000));
+function myTimer() {
+    const d = new Date();
+    broadcast("SYS: " + d.toLocaleTimeString());
+}
+
+server.on('upgrade', (request, socket, head) => {
+    wsServer.handleUpgrade(request, socket, head, socket => {
+      wsServer.emit('connection', socket, request);
+    });
+  });
 
 const port = process.env.PORT || 5003;
 // app.listen(port, function () {

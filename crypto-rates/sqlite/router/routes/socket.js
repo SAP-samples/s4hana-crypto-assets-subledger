@@ -119,6 +119,20 @@ module.exports = () => {
 		}));
 	});
 
+	app.get("/rt", function (req, res) {
+		res.send(nunjucks.render('templates/realtime.njk', { 
+			title: "Real-Time",
+			base: base_path
+		}));
+	});
+
+	app.get("/chart", function (req, res) {
+		res.send(nunjucks.render('templates/chart.njk', { 
+			title: "Real-Time",
+			base: base_path
+		}));
+	});
+
 	
 	// app user info
 	app.get('/info', function (req, res) {

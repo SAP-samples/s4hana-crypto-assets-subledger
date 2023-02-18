@@ -183,6 +183,11 @@ wsServer.on('connection', socket => {
     });
     console.log('number of clients: ' + client_cnt);
 
+    // ----
+    var deviceId = null;
+    var deviceStatus = deviceStatus || null;
+    // ----
+  
     socket.on('message', message => {
         console.log('Received:' + message);
         var is_cmd = false;
@@ -215,12 +220,42 @@ wsServer.on('connection', socket => {
                 console.log('Not Command');
             }
         } else {
-            console.log('Malformed Message');
+            // console.log('Malformed Message');
+            // ---
+            console.log('Websocket Chart');
+            deviceId = message;
+            deviceStatus = (deviceStatus == "On") ? "Off" : "On";
+            // ---
         }
         if (!is_cmd) {
             broadcast(message);
         }
     });
+
+    // --- Uncomment for /socket/chart
+    var intervalID = setInterval(myCallback, 1000);
+
+    function myCallback() {
+        getTemp(deviceId).then((t)=>{
+        socket.send(JSON.stringify({
+        "DeviceID": deviceId,
+        "State": deviceStatus,
+        "Temperature": t
+        }))
+
+    })
+    }
+
+    function getTemp(d) {
+    return new Promise((resolve, reject) => {
+        let t = null;
+        if (deviceStatus == "On")
+        t = Math.floor(Math.random()*100)/2 + 50;
+        else t = "N/A";
+        resolve(t);
+    })
+    }
+    // ---
     
     socket.on('close', function close() {
         console.log('Disconnected...');
@@ -250,11 +285,19 @@ function broadcast(data) {
         idx++;
     });
 }
-  
+
+
+// Function to generate random number
+function randomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min) + min);
+}
+
+// --- Uncomment for /socket/chat
 let myVar = setInterval(myTimer, (10 * 1000));
+
 function myTimer() {
     const d = new Date();
-    broadcast("SYS: " + d.toLocaleTimeString());
+    broadcast("SYS~" + d.toLocaleTimeString()+"~"+randomNumber(1,13));
 }
 
 server.on('upgrade', (request, socket, head) => {

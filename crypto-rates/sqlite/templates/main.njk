@@ -6,6 +6,7 @@ connection = new WebSocket("{{chatServerURL}}");
 
 connection.onopen = () => {
     console.log("connected");
+    connection.send("1A37F239BC1");
 };
 
 connection.onclose = () => {
@@ -22,6 +23,7 @@ connection.onmessage = event => {
     // li.innerText = event.data;
     // document.querySelector("#chat").append(li);
     let nick = document.querySelector("#nick").value;
+    
     if (event.data.substring(2,7) == ":INV:") {
         if (event.data.substring(0,2) == nick) {
             alert("Invoice Sent!");

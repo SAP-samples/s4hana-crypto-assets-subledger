@@ -22,7 +22,14 @@
         "better-sqlite3": "latest",
         "ws": "^7.0.1",
 
-        "nunjucks": "latest"
+        "nunjucks": "latest",
+
+        "bootstrap": "^3.3.7",
+        "d3": "^4.10.0",
+        "handlebars": "^4.0.10",
+        "jquery": "^3.2.1"
+    
+
     },
     "scripts": {
         "debug": "nodemon -e js,njk server.js",

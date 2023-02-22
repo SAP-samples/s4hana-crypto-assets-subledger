@@ -38,24 +38,20 @@ module.exports = () => {
 			base: base_path,
 			links: [
 				{
-					"title": "Links2",
-					"path": base_path + "/links2"
+					"title": "Chat",
+					"path": base_path + "/chat"
 				},
 				{
-					"title": "NoAuth",
-					"path": base_path + "/noauth"
+					"title": "Chart",
+					"path": base_path + "/chart"
+				},
+				{
+					"title": "SignUp",
+					"path": base_path + "/signup"
 				},
 				{
 					"title": "Info",
 					"path": base_path + "/info"
-				},
-				{
-					"title": "DB Reg",
-					"path": base_path + "/db_reg"
-				},
-				{
-					"title": "DB List",
-					"path": base_path + "/db_list"
 				},
 				{
 					"title": "DB ADMIN",
@@ -129,6 +125,13 @@ module.exports = () => {
 	app.get("/chart", function (req, res) {
 		res.send(nunjucks.render('templates/chart.njk', { 
 			title: "Real-Time",
+			base: base_path
+		}));
+	});
+
+	app.get("/signup", function (req, res) {
+		res.send(nunjucks.render('templates/signup.njk', { 
+			title: "Sign Up",
 			base: base_path
 		}));
 	});

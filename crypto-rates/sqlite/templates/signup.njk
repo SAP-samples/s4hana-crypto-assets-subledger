@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+    <meta charset="utf-8" />
+    <title>{{ title }}</title>
+
+    <script
+    src="https://unpkg.com/webln@0.3.2/dist/webln.min.js"
+    integrity="sha384-MpjpvOQqXz9nCoLUS/sR0bhLwGYuNPMOBN50jsqhnqAzDq0GiOI0u6oC5fHitzI2"
+    crossorigin="anonymous"
+    ></script>
+
+    <script>
+
+    //import { requestProvider, MissingProviderError } from 'webln';
+
+    function existsWebLN() {
+        if (((typeof window.webln) == "object") && ((typeof window.webln.enabled) == "boolean")) {
+            document.getElementById("prereqs").style.display = "none";
+            document.getElementById("mainsection").style.display = "block";
+        }
+        else {
+            document.getElementById("prereqs").style.display = "block";
+            document.getElementById("mainsection").style.display = "none";
+        }
+    };
+
+    </script>
+
+    </head>
+    <body style="font-family: Tahoma, Geneva, sans-serif" onload="existsWebLN();">
+    <h1>{{ title}}</h1><br />
+
+    <div id="prereqs">
+        <h3>Prerequisites</h3>
+        <p>
+            This Sign Up procedure requires that a Lightning Node Provider be installed. <br />
+            The <a href="https://getalby.com/" target="get_ext">Alby Browser Extension</a> is recommended. <br />
+            Install an extension and reload this page. <br />
+        </p>
+    </div>
+
+    <div id="mainsection">
+    <!-- <form id="signupform"> -->
+        <table id="signuptable" border=0>
+        <tr><td>LN PubKey:</td><td><input type="text" id="lnpub" name="lnpub" readonly size="66" style="font-family: monospace;" placeholder="Click the button to Connect and Read your PubKey"></td><td><button id="getpubkey" onclick="testLN02()">Connect + Get PubKey</button></td></tr>
+        <tr><td>Nickname:</td><td><input type="text" id="nick" name="nick" minlength="4" maxlength="20" size="20" placeholder="enter a nickname"></td><td>&nbsp;</td></tr>
+        </table>
+        <textarea rows="1" cols="72" id="message"></textarea>
+        <button type="submit" id="send">Send</button>
+        <br />
+        <textarea rows="7" cols="80" id="logger"></textarea>
+        <br />
+        <textarea rows="5" cols="80" id="invoice">No Invoice Yet!</textarea>
+        <br />
+    <!-- </form> -->
+
+    <button id="test01" onclick="testLN01()">Test 01</button>
+    <button id="test02" onclick="testLN02()">Test 02 : GetInfo</button>
+    <button id="test03" onclick="testLN03()">Test 03 : MakeInvoice</button>
+    <button id="test04" onclick="testLN04()">Test 04 : SendPayment</button>
+    <button id="test05" onclick="testLN05()">Test 05 : SignMessage</button>
+    <button id="test06" onclick="testLN06()">Test 06 : VerifyMessage</button>
+
+    <ul id="chat"></ul>
+
+    <ul id="webln">Press Test 01 for current time.</ul>
+
+    </div>
+
+    <script>
+    var input = document.getElementById("message");
+    input.addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        document.getElementById("send").click();
+    }
+    });
+
+    </script>
+
+    <script src="webln_handlers.js"></script>
+
+    <script>
+
+    function doLog(message) {
+
+        var logger = document.querySelector("#logger");
+        logger.innerHTML = logger.innerHTML + "\n" + message;
+        logger.scrollTop = logger.scrollHeight;
+
+    }
+
+
+    async function check4WebLN() {
+        var exists = false;
+        console.log("Checking for WebLN");
+        try {
+            const webln = await WebLN.requestProvider();
+            exists = true;
+        }
+        catch(err) {
+            if (err == WebLN.MissingProviderError) {
+                exists = false;
+            }
+            else {
+                console.log("WebLN Error: " + err);
+            }
+        }
+        return exists;
+    }
+
+    document.getElementById("prereqs").style.display = "none";
+    // document.getElementById("mainsection").style.display = "none";
+    document.getElementById("mainsection").style.display = "none";
+
+    </script>
+
+    </body>
+</html> 

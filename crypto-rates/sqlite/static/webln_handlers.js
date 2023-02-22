@@ -8,19 +8,29 @@ function testLN01() {
 // import { requestProvider } from 'webln';
 
 async function asyncLN02(req, res) {
-    document.getElementById("webln").innerHTML = "Starting...";
+    document.getElementById("getpubkey").innerText = "Processing";
+
+    var msg = "Starting...";
+    document.getElementById("webln").innerHTML = msg;
+
+    doLog(msg);
     try {
         const webln = await WebLN.requestProvider();
-        document.getElementById("webln").innerHTML = "Got reqProv...";
+        msg = "Got reqProv..."; document.getElementById("webln").innerHTML = msg; doLog(msg);
         const info = await webln.getInfo();
         console.log("Info.alias: " + info.node.alias);
         console.log("Info.color: " + info.node.color);
         console.log("Info.pubkey: " + info.node.pubkey);
-        document.getElementById("webln").innerHTML = "Got Infov...";
-      }
-      catch(err) {
+        msg = "Got Infov..."; document.getElementById("webln").innerHTML = msg; doLog(msg);
+        doLog(JSON.stringify(info.node));
+        document.getElementById("lnpub").value = info.node.pubkey;
+        document.getElementById("getpubkey").innerText = "Complete";
+    }
+    catch(err) {
         // Tell the user what went wrong
         console.log(err.message);
+        alert(err.message);
+        doLog(err.message);
     }
 };
 

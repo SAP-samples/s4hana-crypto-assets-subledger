@@ -2,6 +2,7 @@ module.exports = {
     init: init,
     drop: drop,
     prepare: prepare,
+	check_nick_exists: check_nick_exists,
     tenant_register: tenant_register,
     tenant_unregister: tenant_unregister,
     list_all: admin_list_all
@@ -14,8 +15,10 @@ db.pragma('synchronous = 2'); // Force write-through to file system
 // https://sqlite.org/lang_createtable.html
 function init() {
     console.log("do_DB_Init");
-
-    stmt = db.prepare('CREATE TABLE IF NOT EXISTS tenantInfo (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, tenant VARCHAR(256), timeStamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)');
+	//          1         2         3         4         5         6     6   7
+	// 1234567890123456789012345678901234567890123456789012345678901234567890
+	// 0334c29a37fe5d9d5ab8882855c75745f5b5d29cb2c6424fae138a29b248c6cd64
+    stmt = db.prepare('CREATE TABLE IF NOT EXISTS tenantInfo (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, tenant CHAR(36), nick VARCHAR(20), pubkey CHAR(66), timeStamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)');
     info = stmt.run();
     console.log(info.changes);
 
@@ -91,7 +94,28 @@ function prepare(sqlinput) {
 	return db.prepare(sqlout);
 }
 
-function tenant_register(tenantID) {
+function check_nick_exists(newnick) {
+    console.log("check_nick_exists: " + nick);
+
+
+	const rows = db.prepare(`SELECT nick FROM tenantInfo`).all();
+
+	var found = false;
+
+	rows.forEach(row => {
+		console.log(row);
+		if (row.nick == newnick) {
+			found = true;
+		}
+	});
+
+    //db.close();
+
+	return found;
+}
+
+
+function tenant_register(tenantID,nick,pubKey) {
     console.log("tenant_register: " + tenantID);
 
 
@@ -108,8 +132,8 @@ function tenant_register(tenantID) {
 
 
 	if (!found) {
-		const stmt = db.prepare("INSERT INTO tenantInfo(tenant) VALUES (?)");
-		stmt.run(tenantID);
+		const stmt = db.prepare("INSERT INTO tenantInfo(tenant,nick,pubkey) VALUES (?,?,?)");
+		stmt.run(tenantID,nick,pubKey);
 	}
 
     //db.close();

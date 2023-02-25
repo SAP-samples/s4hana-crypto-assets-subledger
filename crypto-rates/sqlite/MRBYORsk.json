@@ -1,0 +1,26 @@
+{
+  "credentials": {
+    "LPSCallbackDependencyName": "market-data-MRM-MRM_BYOD",
+    "downloadUrl": "https://mrmawsus10-mrm-mrm-byod-market-data-download.cfapps.us10.hana.ondemand.com/downloadMarketData",
+    "saasregistryappname": "market-data-MRM-MRM_BYOD",
+    "saasregistryenabled": true,
+    "uaa": {
+      "apiurl": "https://api.authentication.us10.hana.ondemand.com",
+      "clientid": "sb-6d979d34-f4c0-4b90-8629-15201dc0d138!b64971|market-data-MRM-MRM_BYOD!b1736",
+      "clientsecret": "8a696f05-c3a8-4b1c-bc26-bad3a373b1c5$4ekLTgDoiSHm5yze7thFMK1nuzbiEq-zYvv1qDhkLAI=",
+      "credential-type": "binding-secret",
+      "identityzone": "cryptorates",
+      "identityzoneid": "aef487d1-0879-4fb1-a8f4-2384b71226c2",
+      "sburl": "https://internal-xsuaa.authentication.us10.hana.ondemand.com",
+      "subaccountid": "aef487d1-0879-4fb1-a8f4-2384b71226c2",
+      "tenantid": "aef487d1-0879-4fb1-a8f4-2384b71226c2",
+      "tenantmode": "dedicated",
+      "uaadomain": "authentication.us10.hana.ondemand.com",
+      "url": "https://cryptorates.authentication.us10.hana.ondemand.com",
+      "verificationkey": "-----BEGIN PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA+8Nrbx6bRV4sHy7/lWDVeSuvV+Rj9quxC3zuTlmaoALvGPhMxghtWfD25/a8pXYUxfXTVGBvx/rWL8kJ1ywaTpgYORQy4yvQUI5c5pc7nXX4f6PN5uZF2Hw4s1Y0+PGu9STkqGiDlisw331UuEyShi18L2oz6SNo7gWBwynDt7mYmYt6wH0SJNmeV9VQN8fuKNmto3oanJqLchPDfEzyh4+21JcTq6upfXBVHClwEKrc0qDowCtjxHb7uOxvvHhTn9VSb3G1pFMdhvnSIYVOa9bWMesVxIqwi+A1wDxeDENZAIvSvTl3A1/x56aPYaNI1P4T8f7vg4Qj3ViVHq/RkQIDAQAB-----END PUBLIC KEY-----",
+      "xsappname": "6d979d34-f4c0-4b90-8629-15201dc0d138!b64971|market-data-MRM-MRM_BYOD!b1736",
+      "zoneid": "aef487d1-0879-4fb1-a8f4-2384b71226c2"
+    },
+    "uploadUrl": "https://mrmawsus10-mrm-mrm-byod-market-data-upload.cfapps.us10.hana.ondemand.com/uploadMarketData"
+  }
+}

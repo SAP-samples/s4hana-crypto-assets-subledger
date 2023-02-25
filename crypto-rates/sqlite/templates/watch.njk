@@ -46,7 +46,7 @@
         <tr><td align="right">LN PubKey:</td><td><input type="text" id="lnpub" name="lnpub" readonly size="66" style="font-family: monospace;" placeholder="Click the button to Connect and Read your PubKey"></td><td><button id="getpubkey" onclick="testLN02()">Connect + Get PubKey</button></td></tr>
         <tr><td align="right">Nickname:</td><td><input type="text" id="nick" name="nick" minlength="4" maxlength="20" size="20"  style="font-family: monospace;" placeholder="enter a nickname"> Doesn't have to be a real name.</td><td><button id="getpubkey" onclick="testLN02()">Check Availability</button></td></tr>
         <!-- aef487d1-0879-4fb1-a8f4-2384b71226c2 -->
-        <tr><td align="right">Tenant ID:</td><td><input type="text" id="tenantid" name="tenantid" size="66" style="font-family: monospace;" placeholder="On BTP, TenantID is found on Subaccount Overview"></td><td><button id="register" onclick="testLN02()">Register</button></td></tr>
+        <tr><td align="right">Tenant ID:</td><td><input type="text" id="tenantid" name="tenantid" size="66" style="font-family: monospace;" placeholder="On BTP, TenantID is found on Subaccount Overview" value="{{ tenantid }}"></td><td><button id="register" onclick="testLN02()">Register</button></td></tr>
         </table>
         <textarea rows="1" cols="72" id="message"></textarea>
         <button type="submit" id="send">Return Key to Send</button>

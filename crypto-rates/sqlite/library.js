@@ -26,6 +26,30 @@ function init() {
     info = stmt.run();
     console.log(info.changes);
 
+	// 'access_token', 'refresh_token', 'authorization_code', 'client', 'user'
+
+	stmt = db.prepare('CREATE TABLE IF NOT EXISTS access_token (tenant CHAR(36) NOT NULL, rate INTEGER, timeStamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)');
+    info = stmt.run();
+    console.log(info.changes);
+
+	stmt = db.prepare('CREATE TABLE IF NOT EXISTS refresh_token (tenant CHAR(36) NOT NULL, rate INTEGER, timeStamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)');
+    info = stmt.run();
+    console.log(info.changes);
+
+	stmt = db.prepare('CREATE TABLE IF NOT EXISTS authorization_code (tenant CHAR(36) NOT NULL, rate INTEGER, timeStamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)');
+    info = stmt.run();
+    console.log(info.changes);
+
+	stmt = db.prepare('CREATE TABLE IF NOT EXISTS client (tenant CHAR(36) NOT NULL, rate INTEGER, timeStamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)');
+    info = stmt.run();
+    console.log(info.changes);
+
+	stmt = db.prepare('CREATE TABLE IF NOT EXISTS user (tenant CHAR(36) NOT NULL, rate INTEGER, timeStamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)');
+    info = stmt.run();
+    console.log(info.changes);
+
+
+
 // aef487d1-0879-4fb1-a8f4-2384b71226c2 CHAR(36)
 
     //db.close();
@@ -35,11 +59,31 @@ function init() {
 function drop() {
     console.log("do_DB_Drop");
  
-    stmt = db.prepare('DROP TABLE IF EXISTS tenantInfo');
+    stmt = db.prepare('DROP TABLE IF EXISTS user');
+    info = stmt.run();
+    console.log(info.changes);
+
+    stmt = db.prepare('DROP TABLE IF EXISTS client');
+    info = stmt.run();
+    console.log(info.changes);
+
+    stmt = db.prepare('DROP TABLE IF EXISTS authorization_code');
+    info = stmt.run();
+    console.log(info.changes);
+
+    stmt = db.prepare('DROP TABLE IF EXISTS refresh_token');
+    info = stmt.run();
+    console.log(info.changes);
+
+    stmt = db.prepare('DROP TABLE IF EXISTS access_token');
     info = stmt.run();
     console.log(info.changes);
 
     stmt = db.prepare('DROP TABLE IF EXISTS rates');
+    info = stmt.run();
+    console.log(info.changes);
+
+    stmt = db.prepare('DROP TABLE IF EXISTS tenantInfo');
     info = stmt.run();
     console.log(info.changes);
 

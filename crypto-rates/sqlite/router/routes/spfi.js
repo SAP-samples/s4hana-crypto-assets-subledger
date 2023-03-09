@@ -4,6 +4,7 @@ var express = require("express");
 const util = require('util');
 const nunjucks = require('nunjucks');
 
+
 const base_path = "/spfi";
 
 const db = require('../../library');
@@ -38,7 +39,67 @@ module.exports = () => {
         };
         res.status(200).json(info);
     }); 
+
+	app.get("/testpost", async function (req, res) {
+        var inputs = [
+            {
+                id: "yo1",
+                name: "x-sap-saasfulfillment-notification-id",
+                desc: "This id is required to identify a notification in SAP Unified Provisioning. It has to be passed when calling the SaaS Operation API (here resolve and status request).",
+                type: "text",
+                size: 36,
+                default: "aaa",
+                required: true,
+                header: true
+            },
+            {
+                id: "yo2",
+                name: "x-sap-saasfulfillment-callback-url",
+                desc: "This parameter contains the base URL to be used by the SaaS Providers / SPFI Reference application when calling the SaaS Operation API (here resolve and status request).",
+                type: "text",
+                size: 64,
+                default: "bbb",
+                required: true,
+                header: true
+            }
+        ];        
+
+        var headers = [
+            {
+                name: "Content-Type",
+                value: "application/json"
+            },
+            {
+                name: "Accept",
+                value: "application/json"
+            }
+        ];
+
+		res.send(nunjucks.render('templates/apitest2.njk', { 
+			title: "DoPost API Test",
+			base: base_path,
+            path: "dopost",
+            docs: "https://github.wdf.sap.corp/pages/SPC-Cloud-Native-Provisioning/SPFI/sap_spfi_notify_apidoc.html#/",
+            headers: headers,
+			inputs: inputs,
+            expected_status: 200
+		}));
+
+    });
+
+    app.post("/dopost", function (req, res) {
+        var hostname = "localhost";
     
+        if (((typeof req) == "object") && ((typeof req.headers) == "object") && ((typeof req.headers['x-forwarded-host']) == "string")) {
+            hostname = req.headers['x-forwarded-host'];
+        }
+        console.log(req.method + " " + hostname + req.url);
+        let info = {
+            'dopost': hostname + ":" + req.url
+        };
+        res.status(200).json(info);
+    }); 
+
     // Implementing SPSI APIs and Interaction
     // https://pages.github.tools.sap/atom-cfs/atom-docs/docs/providing-services/registering-services/unified-provisioning/onboarding-application/implement_spfi/implementing-spfi-api/
 

@@ -1,5 +1,8 @@
 const express = require('express');
+const session = require('express-session');
+
 const app = express();
+
 app.use(express.static('static'));
 
 var server = require("http").createServer();
@@ -25,8 +28,36 @@ app.use(passport.initialize());
 // }));
 var PassportAuthenticateMiddleware = passport.authenticate('JWT', {session:false});
 
+
+// Run tests via "npm --type=TYPE test" (types available: memory (default), redis are available)
+var TYPE = process.env['npm_config_type'] || 'memory';
+
+var query           = require('querystring');
+var cookieParser    = require('cookie-parser');
+var bodyParser      = require('body-parser');
+
+// var server      = express();    // server == app here
+var oauth20     = require('./oauth20.js')(TYPE);
+var model       = require('./model/' + TYPE);
+
+// Configuration for renewing refresh token in refresh token flow
+oauth20.renewRefreshToken = true;
+
+app.set('oauth2', oauth20);
+
+// Middleware
+app.use(cookieParser());
+// app.use(session({ secret: 'oauth20-provider-test-server', resave: false, saveUninitialized: false }));
+
+// app.use(bodyParser.urlencoded({extended: false}));
+// app.use(bodyParser.json());
+
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+app.use(oauth20.inject());
+
 
 global.gtid = 'aef487d1-0879-4fb1-a8f4-2384b71226c2';  // zone i.e. tenant ID of cryptorates subaccount
 
@@ -89,12 +120,25 @@ app.get(["/","/links"], function (req, res) {
     responseStr += "<a href=\"/spfi/noauth\">SPFI NoAuth</a> no authorization.<br />";
     responseStr += "<a href=\"/socket/links\">Socket Links</a> no authorization.<br />";
     responseStr += "<a href=\"/socket/noauth\">Socket NoAuth</a> no authorization.<br />";
+    responseStr += "<a href=\"/oauth/links\">oauth Links</a> no authorization.<br />";
     responseStr += "<a href=\"/noauth\">NoAuth</a> no authorization.<br />";
     responseStr += "<br />";
     responseStr += "<a href=\"/\">Return to SQLite Root.</a><br />";
     responseStr += "</body></html>";
     res.status(200).send(responseStr);
 });
+
+
+// These are now in routes/oauth.js
+
+// Define OAuth2 Token Endpoint
+// app.post('/oauth/token', oauth20.controller.token);
+
+// Some secure client method
+// app.get('/oauth/client', oauth20.middleware.bearer, function(req, res) {
+//     if (!req.oauth2.accessToken) return res.status(403).send('Forbidden');
+//     res.send('Hi! Dear client ' + req.oauth2.accessToken.clientId + '!');
+// });
 
 
 // No authorization for anything prefixed with /spfi/ or /socket/

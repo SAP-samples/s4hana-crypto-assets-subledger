@@ -34,6 +34,11 @@
             "authenticationType": "none",
             "csrfProtection": false,
             "destination": "sqlite"
+        },        {
+            "source": "^/oauth/(.*)$",
+            "authenticationType": "none",
+            "csrfProtection": false,
+            "destination": "sqlite"
         },
         {
             "source": "^/(.*)",

@@ -9,7 +9,7 @@ Understand that there are 2 environment for internal SAP stakeholders, Canary an
 Log into Canary : [Workspace Link](https://canary.ingress.atomui.sc.shoot.canary.k8s-hana.ondemand.com/app#/project/_all/organizations/sap/folders?path=%2Fbtp%2Fpes%2Fcrypto-assets-subledger)
 ```
 atomctl login --server-url https://canary.resource.api.sap
-atomctl target --base-path /sap/btp/pes/crypto-assets-subledger
+atomctl target --base-path /sap/btp/pes/crypto-assets-subledger // Doesn't seem to work anymore must supply -p instead
 
 cd unified
 ```
@@ -28,7 +28,7 @@ atomctl show-tree folder crypto-assets-subledger -p /sap/btp/pes
 
 Create Resource Groups
 ```
-atomctl apply -f 03_rg_rates.yaml
+atomctl apply -f 03_resource_group_rates.yaml
 
 atomctl apply -f 04_rg_subledger.yaml # Not yet
 ```
@@ -38,4 +38,7 @@ Looks like this may be set up enough for a start.  Maybe revisit later.
 ```
 atomctl show-tree folder crypto-assets-subledger -p /sap/btp/pes --types binding
 ```
+
+https://pages.github.tools.sap/atom-cfs/atom-docs/docs/providing-services/registering-services/unified-provisioning/about-unified-provisioning/spfiapi/
+
 

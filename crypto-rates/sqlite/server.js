@@ -142,7 +142,7 @@ app.get(["/","/links"], function (req, res) {
 
 
 // No authorization for anything prefixed with /spfi/ or /socket/
-app.all(["/spfi/*","/meter/*",'/socket','/socket/chat'], function (req, res, next) {
+app.all(["/spfi/*","/meter/*"], function (req, res, next) {
     var hostname = "localhost";
 
     if (((typeof req) == "object") && ((typeof req.headers) == "object") && ((typeof req.headers['x-forwarded-host']) == "string")) {

@@ -37,12 +37,12 @@ module.exports = () => {
 					"path": base_path + "/noauth"
 				},
 				{
-					"title": "Token",
-					"path": base_path + "/token"
+					"title": "Test Token",
+					"path": base_path + "/test-token"
 				},
 				{
-					"title": "Client",
-					"path": base_path + "/client"
+					"title": "Test Client",
+					"path": base_path + "/test-client"
 				},
 				{
 					"title": "DB Reg",
@@ -78,6 +78,7 @@ module.exports = () => {
                 size: 36,
                 default: "client1.id",
                 required: true,
+				disabled: false,
                 header: true
             },
             {
@@ -88,6 +89,7 @@ module.exports = () => {
                 size: 36,
                 default: "client1.secret",
                 required: true,
+				disabled: false,
                 header: true
             },
             {
@@ -98,6 +100,7 @@ module.exports = () => {
                 size: 24,
                 default: "client_credentials",
                 required: true,
+				disabled: true,
                 header: false
             }
         ];        
@@ -113,7 +116,7 @@ module.exports = () => {
             }
         ];
 
-		res.send(nunjucks.render('templates/apitest2.njk', { 
+		res.send(nunjucks.render('templates/apitestform.njk', { 
 			title: "Token API Test",
 			base: base_path,
             path: "token",
@@ -125,6 +128,18 @@ module.exports = () => {
 
     });
 
+	app.get('/test-client', function(req, res) {
+		res.send(nunjucks.render('templates/apitestget.njk', { 
+			title: "Test Client with Authorization",
+			base: base_path,
+            path: "client",
+            docs: "",
+			params: "",
+            headers: [],
+			body: "",
+            expected_status: 200
+		}));
+	});
 
 	app.get('/client', oauth20.middleware.bearer, function(req, res) {
 		if (!req.oauth2.accessToken) return res.status(403).send('Forbidden');

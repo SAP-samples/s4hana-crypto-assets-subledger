@@ -11,7 +11,7 @@ var port = process.env.PORT || 8080;
 // const db = new Database('data/crypto-rates.db', { verbose: console.log }); // or ':memory:'
 // db.pragma('synchronous = 2'); // Force write-through to file system
 
-const base_path = "/meter";
+const base_path = "/rates";
 
 const db = require('../../library');
 
@@ -24,7 +24,7 @@ module.exports = () => {
 
 	//SRV
 	app.get("/", (req, res) => {
-        console.log("served from socket.js");
+        console.log("served from meter.js");
         // console.log(util.inspect(req.hostname, {depth: 1}));
         //console.log(req.headers['x-forwarded-host']);
 		res.setHeader('Content-Type', 'application/json');
@@ -34,9 +34,13 @@ module.exports = () => {
 	app.get("/links", function (req, res) {
 		console.log("links!");
 		res.send(nunjucks.render('templates/links.njk', { 
-			title: "Meter Links",
+			title: "Rates Links",
 			base: base_path,
 			links: [
+				{
+					"title": "SignUp",
+					"path": base_path + "/signup"
+				},
 				{
 					"title": "Chat",
 					"path": base_path + "/chat"
@@ -46,16 +50,20 @@ module.exports = () => {
 					"path": base_path + "/chart"
 				},
 				{
+					"title": "RT",
+					"path": base_path + "/rt"
+				},
+				{
 					"title": "Watch",
 					"path": base_path + "/watch"
 				},
 				{
-					"title": "Info",
-					"path": base_path + "/info"
+					"title": "Download",
+					"path": base_path + "/downloadCryptoData"
 				},
 				{
-					"title": "DB ADMIN",
-					"path": "/admin" + "/links"
+					"title": "Info",
+					"path": base_path + "/info"
 				}
 			]
 		}));
@@ -115,15 +123,15 @@ module.exports = () => {
 		}));
 	});
 
-	app.get("/rt", function (req, res) {
-		res.send(nunjucks.render('templates/realtime.njk', { 
+	app.get("/chart", function (req, res) {
+		res.send(nunjucks.render('templates/chart.njk', { 
 			title: "Real-Time",
 			base: base_path
 		}));
 	});
 
-	app.get("/chart", function (req, res) {
-		res.send(nunjucks.render('templates/chart.njk', { 
+	app.get("/rt", function (req, res) {
+		res.send(nunjucks.render('templates/realtime.njk', { 
 			title: "Real-Time",
 			base: base_path
 		}));
@@ -142,9 +150,91 @@ module.exports = () => {
 		}));
 	});
 
+	app.get("/signup", function (req, res) {
+		res.send(nunjucks.render('templates/signup.njk', { 
+			title: "Sign Up",
+			base: base_path
+		}));
+	});
 	
 	// app user info
 	app.get('/info', function (req, res) {
+		
+		var user = "unknown";
+		var subdomain = "unknown";
+		var tenant = "unknown";
+
+		if (((typeof req) == "object") && ((typeof req.authInfo) == "object")) {
+			user = req.user;
+			subdomain = req.authInfo.getSubdomain();
+			tenant = req.authInfo.getZoneId();
+		}
+
+		let info = {
+			'userInfo': user,
+			'subdomain': subdomain,
+			'tenantId': tenant
+		};
+
+		if (((typeof req) == "object") && ((typeof req.authInfo) == "object") && req.authInfo.checkScope('$XSAPPNAME.User')) {
+			res.status(200).json(info);
+		} else {
+			res.status(403).send('Forbidden');
+		}
+	});
+
+	
+	app.get("/downloadCryptoData", function (req, res) {
+
+        var headers = [
+            {
+                name: "Content-Type",
+                value: "application/json"
+            },
+            {
+                name: "Accept",
+                value: "application/json"
+            }
+        ];
+
+		var body = [
+			{
+			  "providerCode": "ECB",
+			  "marketDataSource": "ECB",
+			  "marketDataCategory": "01",
+			  "marketDataKey": "EUR~USD",
+			  "marketDataProperty": "CLO",
+			  "fromDate": "0000-00-00",
+			  "fromTime": "00:00:00",
+			  "toDate": "0000-00-00",
+			  "toTime": "00:00:00"
+			}
+		];
+
+		// https://launchpad.support.sap.com/#/notes/2431370
+		// https://help.sap.com/docs/SAP_S4HANA_CLOUD/e5ec5859d8e54df98492d80564a734c0/3c513ff5d5f1468d81dd84a7743256a2.html?locale=en-US
+		// https://help.sap.com/docs/SAP_CP_BUS_REUSE_SERVICE_MRM_APP/64e0eccf2d424543be76606dd5e5e460/41ac38839ac44f90957a4e53e88ae860.html?q=market%20data
+
+		res.send(nunjucks.render('templates/apitestbody.njk', { 
+			title: "Download API Test JSON",
+			base: base_path,
+            path: "downloadCryptoData",
+            docs: "https://help.sap.com/docs/SAP_CP_BUS_REUSE_SERVICE_MRM_APP/64e0eccf2d424543be76606dd5e5e460/41ac38839ac44f90957a4e53e88ae860.html?q=market%20data",
+			params: "async=false",
+            headers: headers,
+			body: JSON.stringify(body, null, 2),
+            expected_status: 200
+		}));
+
+	});
+
+	var TYPE = process.env['npm_config_type'] || 'memory';
+
+	TYPE = "sqlite";
+	
+	var oauth20     = require('./../../oauth20.js')(TYPE);
+
+	app.post('/downloadCryptoData', oauth20.middleware.bearer, function (req, res) {
 		
 		var user = "unknown";
 		var subdomain = "unknown";

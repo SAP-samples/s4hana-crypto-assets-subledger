@@ -69,6 +69,7 @@ var request_hdrs =
 [
 ];
 
+
 var request_obj = 
 {
 };
@@ -84,7 +85,7 @@ var request_obj =
 <table border="0" cellspacing="1" cellpadding="2">
 <tr><th align="right">Name</th><th>Description</th></tr>
 {% for input in inputs %}
-    <tr><td align="right" valign="bottom">{{ input.name }}</td><td>{{ input.desc }}<br /><input type="{{ input.type }}" id="{{ input.id }}" name="{{ input.id }}" value="{{ input.default }}" size={{ input.size }}></td><tr>
+    <tr><td align="right" valign="bottom">{{ input.name }}</td><td>{{ input.desc }}<br /><input type="{{ input.type }}" id="{{ input.id }}" name="{{ input.id }}" value="{{ input.default }}" size={{ input.size }}{% if input.disabled == true %} disabled{% endif %}></td><tr>
 {% else %}
     <tr><td colspan=2>No Inputs!</td></tr>
 {% endfor %}
@@ -93,10 +94,27 @@ var request_obj =
 
 <script type="text/javascript">
 
+function getCookie(cname) {
+  let name = cname + "=";
+  let ca = document.cookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
 function previewPost()
 {
 	var username = "";
 	var password = "";
+
+	request_hdrs = [];
 
 	{% for input in inputs %}
 	{% if input.header == true %}
@@ -113,27 +131,27 @@ function previewPost()
 	request_output += "POST to {{base}}/{{path}} \n";
 	{% for header in headers %}
 	{% if header.name == "Authorization" %}
-	request_output += "Request Header: Authorization = " + encodeForBasicAuth(username,password) + " \n";
+	// request_output += "Request Header: Authorization = " + encodeForBasicAuth(username,password) + " \n";
 	request_hdrs.push( { "{{ header.name }}": encodeForBasicAuth(username,password) } );
 	{% else %}
-	request_output += "Request Header: {{ header.name }} = {{ header.value }} \n";
+	// request_output += "Request Header: {{ header.name }} = {{ header.value }} \n";
 	request_hdrs.push( { "{{ header.name }}": "{{ header.value }}" } );
 	{% endif %}
 	{% endfor %}
 
 	{% for input in inputs %}
 	{% if input.header == false %}
-    request_obj["{{ input.name }}"] = document.getElementById("{{ input.id }}").value;
+    request_obj["{{ input.id }}"] = document.getElementById("{{ input.id }}").value;
 	{% endif %}
 	{% endfor %}
 
 	// Display the request
 
-	request_hdrs.forEach(function(hdr){
-		request_output += "Req Hdr: " + JSON.stringify(hdr) + "\n";
-	});
+	// request_hdrs.forEach(function(hdr){
+	//	request_output += "Req Hdr: " + JSON.stringify(hdr) + "\n";
+	//});
 	
-	document.getElementById("request_content").innerHTML = "<pre>\n" + request_output + "\n" + JSON.stringify(request_hdrs, null, 2) + "\n" + JSON.stringify(request_obj, null, 2) + "</pre>\n";
+	document.getElementById("request_content").innerHTML = "<pre>\n" + "Headers:" + "\n" + JSON.stringify(request_hdrs, null, 2) + "\n\n" + "Body:" + "\n" + JSON.stringify(request_obj, null, 2) + "</pre>\n";
 
 }
 
@@ -144,22 +162,60 @@ function testPost()
 	xhr = new XMLHttpRequest();
 	xhr.open('POST', '{{base}}/{{path}}');
 
-	{% for header in headers %}
-	xhr.setRequestHeader('{{ header.name }}', '{{ header.value }}');
-	{% endfor %}
+//	{% for header in headers %}
+//	xhr.setRequestHeader('{{ header.name }}', '{{ header.value }}');
+//	{% endfor %}
+
+	request_hdrs.forEach(function(hdr){
+		request_output += "Req Hdr: " + JSON.stringify(hdr) + "\n";
+		let hdrArr = Object.entries(hdr);
+		for ([key, value] of hdrArr){
+			xhr.setRequestHeader(key, value);
+		}
+	});
 
 	xhr.onload = function() {
 		// document.getElementById("response_content").innerHTML = "<pre>\n" + xhr.status + " : " + xhr.statusText + "\n" + xhr.responseText + "</pre>\n";
 
 		if (xhr.status === {{expected_status}}) {
 			document.getElementById("response_content").innerHTML = "<pre>\n" + dumpResponseHeaders(xhr) + "Response Body: \n" + JSON.stringify(JSON.parse(xhr.responseText), null, 2) + "</pre>\n";
+
+			var isJsonBody = false;
+			var headers = xhr.getAllResponseHeaders();
+			const hdrs = headers.split('\r\n');
+			hdrs.forEach(function(hdr){
+				var parts = hdr.split(':');
+				if (parts[0] == "content-type") {
+					var bits = parts[1].split(';');
+					if (bits[0].trim() == "application/json") {
+						isJsonBody = true;
+					}
+				}
+			});
+
+			if (isJsonBody) {
+				var jsonBody = JSON.parse(xhr.responseText);
+				let bodyArr = Object.entries(jsonBody);
+				var isBearer = false;
+				for ([key, value] of bodyArr){
+					if ((key == "token_type") && (value == "bearer")) {
+						isBearer = true;
+					} else {
+						if ((key == "access_token") && (isBearer)) {
+							document.cookie = "access_token=" + value + "; path=/";
+						}
+					}
+					
+				}
+			}
 		}
 		else {
 			alert("Yipe!  Got status " + xhr.status + " : " + xhr.statusText + " ::\n " + JSON.parse(xhr.responseText).error.message.value + " \n:: expected 201.");
 		}
 	};
 
-	xhr.send(JSON.stringify(request_obj));
+	xhr.send(Object.keys(request_obj).map(key => encodeURIComponent(key) + '=' + encodeURIComponent(request_obj[key])).join('&'));
+	//xhr.send(JSON.stringify(request_obj));
 
 	//xhr.close();
 	

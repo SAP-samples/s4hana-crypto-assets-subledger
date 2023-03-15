@@ -75,7 +75,7 @@ module.exports = () => {
             }
         ];
 
-		res.send(nunjucks.render('templates/apitest2.njk', { 
+		res.send(nunjucks.render('templates/apitestform.njk', { 
 			title: "DoPost API Test",
 			base: base_path,
             path: "dopost",

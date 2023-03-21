@@ -24,7 +24,9 @@ async function asyncLN02(req, res) {
         msg = "Got Infov..."; document.getElementById("webln").innerHTML = msg; doLog(msg);
         doLog(JSON.stringify(info.node));
         document.getElementById("lnpub").value = info.node.pubkey;
+        document.getElementById("nick").value = info.node.alias;
         document.getElementById("getpubkey").innerText = "Complete";
+        document.getElementById("getnick").innerHTML = "Check Availability";
     }
     catch(err) {
         // Tell the user what went wrong

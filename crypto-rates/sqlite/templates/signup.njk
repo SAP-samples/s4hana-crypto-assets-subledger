@@ -4,11 +4,12 @@
     <meta charset="utf-8" />
     <title>{{ title }}</title>
 
-    <script
+    <!-- <script
     src="https://unpkg.com/webln@0.3.2/dist/webln.min.js"
     integrity="sha384-MpjpvOQqXz9nCoLUS/sR0bhLwGYuNPMOBN50jsqhnqAzDq0GiOI0u6oC5fHitzI2"
     crossorigin="anonymous"
-    ></script>
+    ></script> -->
+    <script src="webln.min.js"></script>
 
     <script>
 
@@ -24,6 +25,29 @@
             document.getElementById("mainsection").style.display = "none";
         }
     };
+
+    function genTrialID() {
+        document.getElementById("tenantid").value = genTrialTenantID();
+        if (checkNickAndTenantID()) {
+            document.getElementById("register").disabled = false;
+        } else {
+            document.getElementById("register").disabled = true;
+        }
+    }
+    var nickIsAvailable = false;
+
+    function nickbutton() {
+        document.getElementById("getnick").innerHTML = "Check Availability";
+        document.getElementById("register").disabled = true;
+    }
+
+    function checkNickAndTenantID() {
+        if ((checkForTenantID(document.getElementById("tenantid").value) && (nickIsAvailable))){
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     </script>
 
@@ -44,9 +68,9 @@
     <!-- <form id="signupform"> -->
         <table id="signuptable" border=0>
         <tr><td align="right">LN PubKey:</td><td><input type="text" id="lnpub" name="lnpub" readonly size="66" style="font-family: monospace;" placeholder="Click the button to Connect and Read your PubKey"></td><td><button id="getpubkey" onclick="testLN02()">Connect + Get PubKey</button></td></tr>
-        <tr><td align="right">Nickname:</td><td><input type="text" id="nick" name="nick" minlength="4" maxlength="20" size="20"  style="font-family: monospace;" placeholder="enter a nickname"> Doesn't have to be a real name.</td><td><button id="getpubkey" onclick="testLN02()">Check Availability</button></td></tr>
+        <tr><td align="right">Nickname:</td><td><input type="text" id="nick" name="nick" minlength="4" maxlength="20" size="20"  style="font-family: monospace;" placeholder="enter a nickname"onKeyDown="nickbutton()"> Doesn't have to be a real name.</td><td><button id="getnick" onclick="doCheckNick()">Check Availability</button></td></tr>
         <!-- aef487d1-0879-4fb1-a8f4-2384b71226c2 -->
-        <tr><td align="right">Tenant ID:</td><td><input type="text" id="tenantid" name="tenantid" size="66" style="font-family: monospace;" placeholder="On BTP, TenantID is found on Subaccount Overview"></td><td><button id="register" onclick="testLN02()">Register</button></td></tr>
+        <tr><td align="right">Tenant ID:</td><td><input type="text" id="tenantid" name="tenantid" size="51" style="font-family: monospace;" placeholder="On BTP, TenantID is found on Subaccount Overview">&nbsp;<button id="gentrialid" align="right" onclick="genTrialID()">Generate Trial ID</button></td><td><button id="register" disabled onclick="doRegister()">Register</button></td></tr>
         </table>
         <textarea rows="1" cols="72" id="message"></textarea>
         <button type="submit" id="send">Return Key to Send</button>
@@ -116,7 +140,141 @@
     // document.getElementById("mainsection").style.display = "none";
     document.getElementById("mainsection").style.display = "none";
 
+    function doCheckNick()
+    {
+
+        var pathAndParams = '{{base}}/getNick' + '?' + '{{params}}';
+
+        xhr = new XMLHttpRequest();
+        xhr.open('POST', pathAndParams);
+
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Accept", "application/json");
+
+        var request_obj = { 
+            "nick": document.getElementById("nick").value
+        };
+
+        document.getElementById("getnick").innerHTML = "Checking";
+
+        xhr.onload = function() {
+            
+            if (xhr.status == 200) {
+                // document.getElementById("response_content").innerHTML = "<pre>\n" + dumpResponseHeaders(xhr) + "Response Body: \n" + JSON.stringify(JSON.parse(xhr.responseText), null, 2) + "</pre>\n";
+
+                var isJsonBody = false;
+                var headers = xhr.getAllResponseHeaders();
+                const hdrs = headers.split('\r\n');
+                hdrs.forEach(function(hdr){
+                    var parts = hdr.split(':');
+                    if (parts[0] == "content-type") {
+                        var bits = parts[1].split(';');
+                        if (bits[0].trim() == "application/json") {
+                            isJsonBody = true;
+                        }
+                    }
+                });
+
+                if (isJsonBody) {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.result) {
+                        document.getElementById("getnick").innerHTML = "Taken, try again.";
+                        nickIsAvailable = false;
+                    } else {
+                        document.getElementById("getnick").innerHTML = "Available";
+                        nickIsAvailable = true;
+                        if (checkNickAndTenantID()) {
+                            document.getElementById("register").disabled = false;
+                        } else {
+                            document.getElementById("register").disabled = true;
+                        }
+                    }
+                }
+            }
+            else {
+                document.getElementById("getnick").innerHTML = "Unexpected";
+            }
+        };
+
+        //xhr.send(Object.keys(request_obj).map(key => encodeURIComponent(key) + '=' + encodeURIComponent(request_obj[key])).join('&'));
+        xhr.send(JSON.stringify(request_obj));
+
+    }
+
+    function doRegister()
+    {
+
+        var pathAndParams = '{{base}}/tenant' + '?' + '{{params}}';
+
+        xhr = new XMLHttpRequest();
+        xhr.open('POST', pathAndParams);
+
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Accept", "application/json");
+
+        var request_obj = { 
+            "pubkey": document.getElementById("lnpub").value,
+            "nick": document.getElementById("nick").value,
+            "tenant": document.getElementById("tenantid").value
+        };
+
+        document.getElementById("register").innerHTML = "Registering";
+
+        xhr.onload = function() {
+            
+            if (xhr.status == 200) {
+                // document.getElementById("response_content").innerHTML = "<pre>\n" + dumpResponseHeaders(xhr) + "Response Body: \n" + JSON.stringify(JSON.parse(xhr.responseText), null, 2) + "</pre>\n";
+
+                var isJsonBody = false;
+                var headers = xhr.getAllResponseHeaders();
+                const hdrs = headers.split('\r\n');
+                hdrs.forEach(function(hdr){
+                    var parts = hdr.split(':');
+                    if (parts[0] == "content-type") {
+                        var bits = parts[1].split(';');
+                        if (bits[0].trim() == "application/json") {
+                            isJsonBody = true;
+                        }
+                    }
+                });
+
+                if (isJsonBody) {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.result) {
+                        document.getElementById("getnick").innerHTML = "Taken, try again.";
+                        nickIsAvailable = false;
+                    } else {
+                        document.getElementById("getnick").innerHTML = "Available";
+                        nickIsAvailable = true;
+                        if (checkNickAndTenantID()) {
+                            document.getElementById("register").disabled = false;
+                        } else {
+                            document.getElementById("register").disabled = true;
+                        }
+                    }
+                }
+            }
+            else {
+                document.getElementById("getnick").innerHTML = "Unexpected";
+            }
+        };
+
+        //xhr.send(Object.keys(request_obj).map(key => encodeURIComponent(key) + '=' + encodeURIComponent(request_obj[key])).join('&'));
+        xhr.send(JSON.stringify(request_obj));
+
+    }
+
+    document.getElementById("tenantid").addEventListener('input', (event) => {
+        if (checkNickAndTenantID()) {
+            document.getElementById("register").disabled = false;
+        } else {
+            document.getElementById("register").disabled = true;
+        }
+    });
+
     </script>
+
+    <script src="util.js"></script>
 
     </body>
 </html> 

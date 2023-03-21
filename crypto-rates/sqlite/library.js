@@ -18,33 +18,82 @@ function init() {
 	//          1         2         3         4         5         6     6   7
 	// 1234567890123456789012345678901234567890123456789012345678901234567890
 	// 0334c29a37fe5d9d5ab8882855c75745f5b5d29cb2c6424fae138a29b248c6cd64
-    stmt = db.prepare('CREATE TABLE IF NOT EXISTS tenantInfo (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, tenant CHAR(36), nick VARCHAR(20), pubkey CHAR(66), timeStamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)');
+	var createstr = '';
+
+	createstr  = 'CREATE TABLE IF NOT EXISTS tenantInfo (';
+	createstr += 'id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, ';
+	createstr += 'tenant CHAR(36), ';
+	createstr += 'nick VARCHAR(20), ';
+	createstr += 'pubkey CHAR(66), ';
+	createstr += 'timeStamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL';
+	createstr += ')';
+	
+    stmt = db.prepare(createstr);
     info = stmt.run();
     console.log(info.changes);
 
-    stmt = db.prepare('CREATE TABLE IF NOT EXISTS rates (tenant CHAR(36) NOT NULL, rate INTEGER, timeStamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)');
+	createstr  = 'CREATE TABLE IF NOT EXISTS rates (';
+	createstr += 'tenant CHAR(36) NOT NULL, ';
+	createstr += 'rate INTEGER, ';
+	createstr += 'timeStamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL';
+	createstr += ')';
+
+    stmt = db.prepare(createstr);
     info = stmt.run();
     console.log(info.changes);
 
 	// 'access_token', 'refresh_token', 'authorization_code', 'client', 'user'
 
-	stmt = db.prepare('CREATE TABLE IF NOT EXISTS access_token (tenant CHAR(36) NOT NULL, rate INTEGER, timeStamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)');
+	createstr  = 'CREATE TABLE IF NOT EXISTS access_token (';
+	createstr += 'tenant CHAR(36) NOT NULL, ';
+	createstr += 'rate INTEGER, ';
+	createstr += 'timeStamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL';
+	createstr += ')';
+
+	stmt = db.prepare(createstr);
     info = stmt.run();
     console.log(info.changes);
 
-	stmt = db.prepare('CREATE TABLE IF NOT EXISTS refresh_token (tenant CHAR(36) NOT NULL, rate INTEGER, timeStamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)');
+	createstr  = 'CREATE TABLE IF NOT EXISTS refresh_token (';
+	createstr += 'tenant CHAR(36) NOT NULL, ';
+	createstr += 'rate INTEGER, ';
+	createstr += 'timeStamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL';
+	createstr += '';
+	createstr += ')';
+
+	stmt = db.prepare(createstr);
     info = stmt.run();
     console.log(info.changes);
 
-	stmt = db.prepare('CREATE TABLE IF NOT EXISTS authorization_code (tenant CHAR(36) NOT NULL, rate INTEGER, timeStamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)');
+	createstr  = 'CREATE TABLE IF NOT EXISTS authorization_code (';
+	createstr += 'tenant CHAR(36) NOT NULL, ';
+	createstr += 'rate INTEGER, ';
+	createstr += 'timeStamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL';
+	createstr += ')';
+
+	stmt = db.prepare(createstr);
     info = stmt.run();
     console.log(info.changes);
 
-	stmt = db.prepare('CREATE TABLE IF NOT EXISTS client (tenant CHAR(36) NOT NULL, rate INTEGER, timeStamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)');
+	createstr  = 'CREATE TABLE IF NOT EXISTS client (';
+	createstr += 'id CHAR(36) NOT NULL, ';
+	createstr += 'name CHAR(36) NOT NULL, ';
+	createstr += 'secret CHAR(36) NOT NULL, ';
+	createstr += 'redirectUri CHAR(36) NOT NULL, ';
+	createstr += 'timeStamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL';
+	createstr += ')';
+
+	stmt = db.prepare(createstr);
     info = stmt.run();
     console.log(info.changes);
 
-	stmt = db.prepare('CREATE TABLE IF NOT EXISTS user (tenant CHAR(36) NOT NULL, rate INTEGER, timeStamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL)');
+	createstr  = 'CREATE TABLE IF NOT EXISTS user (';
+	createstr += 'tenant CHAR(36) NOT NULL, ';
+	createstr += 'rate INTEGER, ';
+	createstr += 'timeStamp DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL';
+	createstr += ')';
+
+	stmt = db.prepare(createstr);
     info = stmt.run();
     console.log(info.changes);
 
@@ -138,7 +187,7 @@ function prepare(sqlinput) {
 	return db.prepare(sqlout);
 }
 
-function check_nick_exists(newnick) {
+function check_nick_exists(nick) {
     console.log("check_nick_exists: " + nick);
 
 
@@ -148,7 +197,7 @@ function check_nick_exists(newnick) {
 
 	rows.forEach(row => {
 		console.log(row);
-		if (row.nick == newnick) {
+		if (row.nick == nick) {
 			found = true;
 		}
 	});
@@ -175,7 +224,14 @@ function tenant_register(tenantID,nick,pubKey) {
 	});
 
 
+
 	if (!found) {
+
+		// Generate a clientid
+		// Generate a secret
+		// Generate a download URL
+		// Insert the clientid into the client table
+		// Maybe combine the tenant table and the client table???
 		const stmt = db.prepare("INSERT INTO tenantInfo(tenant,nick,pubkey) VALUES (?,?,?)");
 		stmt.run(tenantID,nick,pubKey);
 	}

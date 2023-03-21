@@ -236,6 +236,25 @@ module.exports = () => {
 
 	app.post('/downloadCryptoData', oauth20.middleware.bearer, function (req, res) {
 		
+		// Check for valid access token
+		if (!req.oauth2.accessToken) return res.status(403).send('Forbidden');
+		res.send('Hi! Dear client ' + req.oauth2.accessToken.clientId + '!');
+
+		// Check if the tenant_id exists.  What plan are they on?  Free, Monthly
+
+		// Check if they have any satoshi credits
+
+		// Check if they have a lightning wallet registered
+
+		// Check if the last lightning invoice was paid properly
+
+		// Make the request to the Crypto backend(s)
+
+		// Send and invoice + wait to get paid
+
+		// When paid, return the quotes
+
+		// 
 		var user = "unknown";
 		var subdomain = "unknown";
 		var tenant = "unknown";
@@ -256,6 +275,97 @@ module.exports = () => {
 			res.status(200).json(info);
 		} else {
 			res.status(403).send('Forbidden');
+		}
+	});
+
+	app.get("/tenant", function (req, res) {
+
+        var headers = [
+            {
+                name: "Content-Type",
+                value: "application/json"
+            },
+            {
+                name: "Accept",
+                value: "application/json"
+            }
+        ];
+
+		var body = 
+			{
+				"tenant": "0abbacab-5c48-4f38-120b-23495e40ec3e",
+				"nick": "theGreek",
+				"pubkey": "0334c29a37fe5d9d5ab8882855c75745f5b5d29cb2c6424fae138a29b248c6cd64"
+			};
+
+		res.send(nunjucks.render('templates/apitestbody.njk', { 
+			title: "tenant API Test JSON",
+			base: base_path,
+            path: "tenant",
+            docs: "",
+			params: "async=false",
+            headers: headers,
+			body: JSON.stringify(body, null, 2),
+            expected_status: 200
+		}));
+
+	});
+
+	app.post('/tenant', function (req, res) {
+	
+		if (((typeof req) == "object") && ((typeof req.body) == "object")) {
+			if (!(db.tenant_register(req.body.tenant, req.body.nick, req.body.pubkey))) {
+				res.status(200).json({"result": req.body.nick + " was registered"});
+			} else {
+				res.status(200).json({"result": req.body.nick + " is already registered"});
+			}
+		} else {
+
+		}
+	});
+
+	app.get("/getNick", function (req, res) {
+
+        var headers = [
+            {
+                name: "Content-Type",
+                value: "application/json"
+            },
+            {
+                name: "Accept",
+                value: "application/json"
+            }
+        ];
+
+		var body = 
+			{
+			  "nick": "theGreek"
+			}
+		;
+
+		res.send(nunjucks.render('templates/apitestbody.njk', { 
+			title: "getNick API Test JSON",
+			base: base_path,
+            path: "getNick",
+            docs: "",
+			params: "async=false",
+            headers: headers,
+			body: JSON.stringify(body, null, 2),
+            expected_status: 200
+		}));
+
+	});
+
+	app.post('/getNick', function (req, res) {
+		
+		if (((typeof req) == "object") && ((typeof req.body) == "object")) {
+			if (db.check_nick_exists(req.body.nick)) {
+				res.status(200).json({"result": true});
+			} else {
+				res.status(200).json({"result": false});
+			}
+		} else {
+			res.status(200).json({"status": "unexpected body"});
 		}
 	});
 

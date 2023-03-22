@@ -1,3 +1,5 @@
+const db = require('../../../library');
+
 var crypto = require('crypto'),
     accessTokens = require('../../data.js').accessTokens,
     moment = require('moment');
@@ -9,9 +11,17 @@ module.exports.getToken = function(accessToken) {
 
 module.exports.create = function(userId, clientId, scope, ttl, cb) {
     var token = crypto.randomBytes(64).toString('hex');
-    var obj = {token: token, userId: userId, clientId: clientId, scope: scope, ttl: new Date().getTime() + ttl * 1000};
-    console.log("create: " + JSON.stringify(obj));
+    var ttl = new Date().getTime() + ttl * 1000
+    console.log("token: " + token);
+    console.log("userId: " + userId);
+    console.log("clientId: " + clientId);
+    console.log("scope: " + JSON.stringify(scope));
+    console.log("ttl: " + ttl);
+    var obj = {token: token, userId: userId, clientId: clientId, scope: scope, ttl: ttl};
+    // console.log("create: " + JSON.stringify(obj));
     accessTokens.push(obj);
+    db.push_accessToken(token,userId,clientId,scope,ttl);
+
     cb(null, token);
 };
 

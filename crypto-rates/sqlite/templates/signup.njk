@@ -240,16 +240,14 @@
 
                 if (isJsonBody) {
                     var response = JSON.parse(xhr.responseText);
-                    if (response.result) {
-                        document.getElementById("getnick").innerHTML = "Taken, try again.";
-                        nickIsAvailable = false;
+                    if (response.status == "exists") {
+                        document.getElementById("register").innerHTML = "Already Registered";
                     } else {
-                        document.getElementById("getnick").innerHTML = "Available";
-                        nickIsAvailable = true;
-                        if (checkNickAndTenantID()) {
-                            document.getElementById("register").disabled = false;
+                        if (response.status == "registered") {
+                            document.getElementById("register").innerHTML = "Registered";
+                            doLog(JSON.stringify(response,null,2));
                         } else {
-                            document.getElementById("register").disabled = true;
+                            document.getElementById("register").innerHTML = "KaPut";
                         }
                     }
                 }

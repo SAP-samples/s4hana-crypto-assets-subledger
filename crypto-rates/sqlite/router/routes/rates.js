@@ -314,10 +314,11 @@ module.exports = () => {
 	app.post('/tenant', function (req, res) {
 	
 		if (((typeof req) == "object") && ((typeof req.body) == "object")) {
-			if (!(db.tenant_register(req.body.tenant, req.body.nick, req.body.pubkey))) {
-				res.status(200).json({"result": req.body.nick + " was registered"});
+			var result_obj = db.tenant_register(req.body.tenant, req.body.nick, req.body.pubkey);
+			if ((typeof result_obj) == "object") {
+				res.status(200).json(result_obj);
 			} else {
-				res.status(200).json({"result": req.body.nick + " is already registered"});
+				res.status(200).json({"status": "unexpected result."});
 			}
 		} else {
 

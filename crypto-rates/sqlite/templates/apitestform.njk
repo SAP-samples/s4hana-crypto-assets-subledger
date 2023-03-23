@@ -169,6 +169,8 @@ function testPost()
 	xhr.open('POST', '{{base}}/{{path}}');
 
 	delCookie("access_token");
+	delCookie("JSESSIONID");
+
 
 //	{% for header in headers %}
 //	xhr.setRequestHeader('{{ header.name }}', '{{ header.value }}');

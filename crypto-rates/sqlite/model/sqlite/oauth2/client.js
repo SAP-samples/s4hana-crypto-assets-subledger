@@ -4,7 +4,12 @@ var clients = require('../../data.js').clients;
 
 module.exports.getId = function(client) {
     console.log("getId: " + JSON.stringify(client));
-    return client.id;
+    var useMemory = false;
+    if (useMemory) {
+        return client.id;
+    } else {
+        return client.id;
+    }   
 };
 
 module.exports.getRedirectUri = getRedirectUri;
@@ -31,12 +36,16 @@ module.exports.fetchById = function(clientId, cb) {
 };
 
 module.exports.checkSecret = function(client, secret, cb) {
-    console.log("checkSecret: " + JSON.stringify(client) + JSON.stringify(secret));
+    console.log("checkSecret: " + JSON.stringify(client) + " : " + JSON.stringify(secret));
 
     //NEXT STEP:  DO this in an SQLite way
-
-    return cb(null, client.secret == secret);
-};
+    var useMemory = false;
+    if (useMemory) {
+        return cb(null, client.secret == secret);
+    } else {
+        return cb(null, db.checkSecret(client,secret));
+    }
+ };
 
 function getRedirectUri(client) {
     return client.redirectUri;

@@ -7,7 +7,10 @@ module.exports = {
     tenant_unregister: tenant_unregister,
     list_all: admin_list_all,
 	push_accessToken: push_accessToken,
-	fetchById: fetchById
+	fetchById: fetchById,
+	checkSecret: checkSecret,
+	fetchByToken: fetchByToken,
+	getTenantByID: getTenantByID
 };
 
 const Database = require("better-sqlite3");
@@ -22,6 +25,35 @@ function init() {
 	// 0334c29a37fe5d9d5ab8882855c75745f5b5d29cb2c6424fae138a29b248c6cd64
 	var createstr = '';
 
+
+	createstr  = 'CREATE TABLE IF NOT EXISTS planType (';
+	createstr += 'type CHAR(1) PRIMARY KEY NOT NULL, ';
+	createstr += 'name CHAR(8) NOT NULL, ';
+	createstr += 'seq INTEGER';
+	createstr += ')';
+
+    stmt = db.prepare(createstr);
+    info = stmt.run();
+    console.log(info.changes);
+
+	var insertstr = "";
+	
+	insertstr = "INSERT INTO planType(type, name, seq) VALUES ('F','Free',1)";		// Free plan
+	stmt = db.prepare(insertstr);
+	info = stmt.run();
+	console.log(info.changes);
+
+	insertstr = "INSERT INTO planType(type, name, seq) VALUES ('S','Standard',2)";	// Standard plan
+	stmt = db.prepare(insertstr);
+	info = stmt.run();
+	console.log(info.changes);
+
+	insertstr = "INSERT INTO planType(type, name, seq) VALUES ('X','Extra',3)";		// eXtra plan
+	stmt = db.prepare(insertstr);
+	info = stmt.run();
+	console.log(info.changes);
+
+
 	createstr  = 'CREATE TABLE IF NOT EXISTS tenantInfo (';
 	createstr += 'id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, ';
 	createstr += 'tenant CHAR(36), ';
@@ -30,6 +62,7 @@ function init() {
 	createstr += 'clientid CHAR(36), ';
 	createstr += 'clientsecret CHAR(48), ';
 	createstr += 'redirectUri CHAR(96), ';
+	createstr += "plan CHAR(1) NOT NULL DEFAULT ('F') REFERENCES planType(type) , ";
 	createstr += 'satoshi INTEGER DEFAULT 1000000 NOT NULL, ';
 	createstr += 'created DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, ';
 	createstr += 'modified DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL';
@@ -39,6 +72,28 @@ function init() {
     info = stmt.run();
     console.log(info.changes);
 
+
+	insertstr  = "INSERT INTO tenantInfo(";
+	insertstr += 'tenant, ';
+	insertstr += 'nick, ';
+	insertstr += 'pubkey, ';
+	insertstr += 'clientid, ';
+	insertstr += 'clientsecret, ';
+	insertstr += 'redirectUri ';
+	insertstr += ') VALUES (';
+	insertstr += '?,';
+	insertstr += '?,';
+	insertstr += '?,';
+	insertstr += '?,';
+	insertstr += '?,';
+	insertstr += '?)';
+
+	console.log("insertstr: " + insertstr);
+
+	stmt = db.prepare(insertstr);
+
+	info = stmt.run("0abbacab-0000-0000-0000-000000000000","client1","","client1.id","client1.secret","http://example.org/oauth2");
+	console.log(info.changes);
 
 
 	createstr  = 'CREATE TABLE IF NOT EXISTS rates (';
@@ -109,28 +164,6 @@ function init() {
     info = stmt.run();
     console.log(info.changes);
 
-	var insertstr  = "INSERT INTO tenantInfo(";
-	insertstr += 'tenant, ';
-	insertstr += 'nick, ';
-	insertstr += 'pubkey, ';
-	insertstr += 'clientid, ';
-	insertstr += 'clientsecret, ';
-	insertstr += 'redirectUri ';
-	insertstr += ') VALUES (';
-	insertstr += '?,';
-	insertstr += '?,';
-	insertstr += '?,';
-	insertstr += '?,';
-	insertstr += '?,';
-	insertstr += '?)';
-
-	console.log("insertstr: " + insertstr);
-
-	stmt = db.prepare(insertstr);
-
-	info = stmt.run("0abbacab-0000-0000-0000-000000000000","client1","","client1.id","client1.secret","http://example.org/oauth2");
-	console.log(info.changes);
-
 // aef487d1-0879-4fb1-a8f4-2384b71226c2 CHAR(36)
 
     //db.close();
@@ -165,6 +198,10 @@ function drop() {
     console.log(info.changes);
 
     stmt = db.prepare('DROP TABLE IF EXISTS tenantInfo');
+    info = stmt.run();
+    console.log(info.changes);
+
+    stmt = db.prepare('DROP TABLE IF EXISTS planType');
     info = stmt.run();
     console.log(info.changes);
 
@@ -239,6 +276,7 @@ function check_nick_exists(nick) {
 	return found;
 }
 
+
 function fetchById(clientid) {
     console.log("fetchById: " + clientid);
 
@@ -247,6 +285,49 @@ function fetchById(clientid) {
 	console.log("tenant: " + JSON.stringify(tenant,null,2));
 
 	return tenant;
+}
+
+function fetchByToken(token) {
+    console.log("fetchByToken: " + token);
+
+	const access_token = db.prepare(`SELECT token,userId,clientId,scope,ttl FROM access_token WHERE token = ?`).get(token);
+
+	access_token.scope = JSON.parse(access_token.scope);
+
+	if ((access_token) && (typeof access_token == "object")) {
+		return access_token;
+	} else {
+		return null;
+	}
+}
+
+function checkSecret(client, secret) {
+    console.log("checkSecret: " + secret);
+
+	const tenant = db.prepare(`SELECT clientid,clientsecret FROM tenantInfo WHERE clientid = ?`).get(client.id);
+
+	console.log("tenant: " + JSON.stringify(tenant,null,2));
+
+	if ((tenant) && (typeof tenant == "object") && (typeof tenant.clientsecret == "string") && (tenant.clientsecret == secret)) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+function getTenantByID(tenantID) {
+    console.log("getTenantByID: " + tenantID);
+
+	const tenant = db.prepare(`SELECT tenant,nick,pubkey,clientid,redirectUri,plan,satoshi FROM tenantInfo WHERE tenant = ?`).get(tenantID);
+
+	if ((tenant) && (typeof tenant == "object")) {
+
+		console.log("tenant: " + JSON.stringify(tenant,null,2));
+		return tenant;
+
+	} else {
+		return null;
+	}
 }
 
 var crypto = require('crypto');

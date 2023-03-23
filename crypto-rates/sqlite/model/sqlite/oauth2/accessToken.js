@@ -27,8 +27,13 @@ module.exports.create = function(userId, clientId, scope, ttl, cb) {
 
 module.exports.fetchByToken = function(token, cb) {
     console.log("fetchByToken: " + token);
-    for (var i in accessTokens) {
-        if (accessTokens[i].token == token) return cb(null, accessTokens[i]);
+    var useMemory = false;
+    if (useMemory) {
+        for (var i in accessTokens) {
+            if (accessTokens[i].token == token) return cb(null, accessTokens[i]);
+        }
+    } else {
+        return cb(null, db.fetchByToken(token));
     }
     cb();
 };

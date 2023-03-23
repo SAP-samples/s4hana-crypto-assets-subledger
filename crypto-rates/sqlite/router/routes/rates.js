@@ -237,44 +237,71 @@ module.exports = () => {
 	app.post('/downloadCryptoData', oauth20.middleware.bearer, function (req, res) {
 		
 		// Check for valid access token
-		if (!req.oauth2.accessToken) return res.status(403).send('Forbidden');
-		res.send('Hi! Dear client ' + req.oauth2.accessToken.clientId + '!');
-
-		// Check if the tenant_id exists.  What plan are they on?  Free, Monthly
-
-		// Check if they have any satoshi credits
-
-		// Check if they have a lightning wallet registered
-
-		// Check if the last lightning invoice was paid properly
-
-		// Make the request to the Crypto backend(s)
-
-		// Send and invoice + wait to get paid
-
-		// When paid, return the quotes
-
-		// 
-		var user = "unknown";
-		var subdomain = "unknown";
-		var tenant = "unknown";
-
-		if (((typeof req) == "object") && ((typeof req.authInfo) == "object")) {
-			user = req.user;
-			subdomain = req.authInfo.getSubdomain();
-			tenant = req.authInfo.getZoneId();
-		}
-
-		let info = {
-			'userInfo': user,
-			'subdomain': subdomain,
-			'tenantId': tenant
-		};
-
-		if (((typeof req) == "object") && ((typeof req.authInfo) == "object") && req.authInfo.checkScope('$XSAPPNAME.User')) {
-			res.status(200).json(info);
+		if (!req.oauth2.accessToken) {
+			return res.status(403).send('Forbidden');
 		} else {
-			res.status(403).send('Forbidden');
+			var tenantID = req.oauth2.accessToken.clientId;
+
+			// Check if the tenant_id exists.  
+			var tenant = db.getTenantByID(tenantID);
+			var quoteCost = 1000;	// Estimate of quote cost in satoshis
+
+			if ((tenant) && (typeof tenant == "object")) {
+
+				// Make an estimate of what the crypto rate request will cost
+				// quoteCost = getQuoteCost(req.body);
+
+				
+				// What plan are they on?  Free, Monthly?
+				if (tenant.plan == "F") {
+					// Need to decide if we want to fetch first and invoice after or invoice first
+					// Check if they have any satoshi credits
+					if (tenant.satoshi >= quoteCost) {
+						// Deduct from the tenant's satoshi total
+						// Fetch the results
+						// Return the results
+						return res.status(200).json(tenant);
+					} else {
+						// Check if they have a lightning wallet registered
+						if (tenant.pubkey !== "") {
+							// Check if the last lightning invoice was paid properly
+
+							// Check to see if this tenant has an established socket connection
+
+							if (true) {
+								// Fetch the results
+								// Make the request to the Crypto backend(s)
+
+								// Cause the invoice to be sent to the browser
+
+								// Wait for payment confirmation
+
+								// When paid, return the quotes
+								// Return the results
+								return res.status(200).json(tenant);
+							} else {
+								console.log("Problem: " + "Lightning payment require a connected Lightning wallet.");
+								return res.status(403).send('Forbidden');
+							}
+						} else {
+							console.log("Problem: " + "You need some satoshis or a Lightning wallet registered.");
+							return res.status(403).send('Forbidden');
+						}
+					}
+
+				} else {
+					console.log("Problem: " + "Only supporting Free plan at this time.");
+					return res.status(403).send('Forbidden');
+				}
+
+			} else {
+				console.log("Problem: " + "getting tenant " + tenantID);
+				return res.status(403).send('Forbidden');
+			}
+
+
+			
+			
 		}
 	});
 

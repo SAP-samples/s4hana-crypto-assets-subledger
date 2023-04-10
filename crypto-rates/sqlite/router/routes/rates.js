@@ -69,9 +69,18 @@ module.exports = () => {
 		}));
 	});
 	
-	app.get("/main.js", function (req, res) {
+	var TYPE = process.env['npm_config_type'] || 'memory';
 
-		var chatServerURL = "ws://localhost:" + port;
+	TYPE = "sqlite";
+	
+	var oauth20     = require('./../../oauth20.js')(TYPE);
+
+	app.get("/main.js", function (req, res) {
+		var tenantid = "";
+		console.log("req.query: " + JSON.stringify(req.query));
+		tenantid = req.query.tenantid;
+
+		var chatServerURL = "ws://localhost:" + port + "?tenantid=" + tenantid;
 		//var chatServerURL = "wss://chat-srv.cfapps.us10.hana.ondemand.com";
 	
 		// If deployed in BTP CF then pick the first uri found in VCAP_APPLICATION
@@ -117,6 +126,15 @@ module.exports = () => {
 	});
 	
 	app.get("/chat", function (req, res) {
+		console.log("req.query: " + JSON.stringify(req.query));
+		res.send(nunjucks.render('templates/socketchat.njk', { 
+			title: "SocketChat",
+			tenantid: req.query.tenantid,
+			base: base_path
+		}));
+	});
+
+	app.get("/authchat", oauth20.middleware.bearer, function (req, res) {
 		res.send(nunjucks.render('templates/socketchat.njk', { 
 			title: "SocketChat",
 			base: base_path

@@ -3,9 +3,55 @@
     <head>
     <meta charset="utf-8" />
     <title>Web Socket Demo</title>
+    <script>
+    (function () {
+        var onWindowLoad = function () {
+            
+            var loadScript = function (src, callback) {
+            
+                var element = document.createElement("script");
+                    element.src = src;
+                    element.async = true;
+                    document.body.appendChild(element);
+                    
+                    if (callback) {
+                    
+                        element.onreadystatechange = function () {
+                            if (this.readyState === "loaded" || this.readyState === "complete") { 
+                                callback();
+                            }
+                        };
+                        element.onload = callback;
+                    }
+            },
+            
+            loadArticleScript = function () {
+                checkForAuthToken();
+            };
+            loadScript("https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js", loadArticleScript);
+        };
+
+        if (window.addEventListener) {
+            window.addEventListener("load", onWindowLoad, false);
+        } else if (window.attachEvent) {
+            window.attachEvent("onload", onWindowLoad);
+        } else {
+            window.onload = onWindowLoad;
+        }
+    }());			
+    </script>
 
     </head>
     <body style="font-family: Tahoma, Geneva, sans-serif">
+    
+    <div id="tokendiv" style="display: none;" >
+    <table border="0" cellspacing="1" cellpadding="2">
+    <tr><th align="right">Name</th><th>Description</th></tr>
+    <tr><td align="right"><a href="/oauth/test-token" target="getauth">Auth</a></td><td><textarea rows="4" cols="60" id="bearertoken" disabled>No Bearer Token Found.</textarea></td></tr>
+    <!-- <tr><td align="right">Body</td><td><textarea rows="14" cols="60" id="postbody">{{body}}</textarea></td></tr> -->
+    </table>
+    </div>
+
     <!-- <button id="onboard">Loading...</button> <div id="chainlist" style="display: inline">Add a Theta network to your MetaMask with <a href="https://chainlist.org/?search=theta" target="chainlist">ChainList</a></div><br /> -->
     <!-- <textarea rows="1" cols="80" id="nick"></textarea> -->
     Nickname: <input type="text" id="nick" size="4" style="font-family: monospace" onInput="showCurrentValue(event)" /> Address: <input type="text" id="addr" size="42" style="font-family: monospace" />
@@ -36,7 +82,7 @@
 
     <ul id="chat"></ul>
 
-    <script src="main.js"></script>
+    <script src="main.js?tenantid={{tenantid}}"></script>
     <script src="common.js"></script>
     <script
     src="https://unpkg.com/webln@0.3.2/dist/webln.min.js"
@@ -52,6 +98,36 @@
         document.getElementById("send").click();
     }
     });
+
+    function getCookie(cname) {
+    let name = cname + "=";
+    let ca = document.cookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+    }
+
+    var bearerToken = "I am a BEARer";
+
+    function checkForAuthToken()
+    {
+        bearerToken = getCookie("access_token");
+
+        if (bearerToken != "") {
+            document.getElementById("bearertoken").value = bearerToken;
+
+        } else {
+            document.getElementById("bearertoken").value = "Click Auth to get a valid bearer token.\nThen return here and reload the page.";
+        }
+    }
+
     </script>
 
     <script src="webln_handlers.js"></script>

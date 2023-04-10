@@ -3,6 +3,8 @@
 var express = require("express");
 const nunjucks = require('nunjucks');
 const util = require('util');
+var query  = require('querystring');
+// var session = require('express-session');
 
 // const Database = require("better-sqlite3");
 // const db = new Database('data/crypto-rates.db', { verbose: console.log }); // or ':memory:'
@@ -37,12 +39,24 @@ module.exports = () => {
 					"path": base_path + "/noauth"
 				},
 				{
+					"title": "Login",
+					"path": base_path + "/login"
+				},
+				{
 					"title": "Test Token",
 					"path": base_path + "/test-token"
 				},
 				{
 					"title": "Test Client",
 					"path": base_path + "/test-client"
+				},
+				{
+					"title": "GoTo Client",
+					"path": base_path + "/goto?dest=" + base_path + "/client"
+				},
+				{
+					"title": "GoTo Chat",
+					"path": base_path + "/goto?dest=" + "/rates" + "/chat"
 				},
 				{
 					"title": "DB Reg",
@@ -67,6 +81,53 @@ module.exports = () => {
 	var oauth20     = require('./../../oauth20.js')(TYPE);
 
 	app.post('/token', oauth20.controller.token);
+
+	// Define user login routes
+	app.get('/login', function(req, res) {
+        var responseStr = "";
+		responseStr += "<!DOCTYPE HTML><html><head><title>Login</title></head><body><h3>Login</h3><br />";
+		responseStr += '<form action="' + base_path + "/login?backUrl=/client" + '" method="post">' + "\n";
+		responseStr += '<label>Username : </label>' + "\n";
+		responseStr += '<input type="text" placeholder="Enter Username" name="username" required>' + "\n";
+		responseStr += '<label>Password : </label>' + "\n";
+		responseStr += '<input type="password" placeholder="Enter Password" name="password" required>' + "\n";
+		responseStr += '<button type="submit">Login</button>' + "\n";
+		responseStr += '</form>' + "\n";
+		responseStr += "</body></html>";
+		res.status(200).send(responseStr);
+	});
+
+	// This is not working yet. (Might not ever want to get it working)
+	app.post('/login', function(req, res, next) {
+		console.log("req: " + JSON.stringify(req.query,null,2));
+		var backUrl = req.query.backUrl ? req.query.backUrl : '/';
+		delete(req.query.backUrl);
+		backUrl += backUrl.indexOf('?') > -1 ? '&' : '?';
+		backUrl += query.stringify(req.query);
+		console.log("backUrl: " + backUrl);
+	
+		// Already logged in
+		if (req.session.authorized) res.redirect(backUrl);
+		// Trying to log in
+		else if (req.body.username && req.body.password) {
+			model.oauth2.user.fetchByUsername(req.body.username, function(err, user) {
+				if (err) next(err);
+				else {
+					model.oauth2.user.checkPassword(user, req.body.password, function(err, valid) {
+						if (err) next(err);
+						else if (!valid) res.redirect(req.url);
+						else {
+							req.session.user = user;
+							req.session.authorized = true;
+							res.redirect(backUrl);
+						}
+					});
+				}
+			});
+		}
+		// Please login
+		else res.redirect(req.url);
+	});
 
 	app.get("/test-token", async function (req, res) {
         var inputs = [
@@ -133,6 +194,19 @@ module.exports = () => {
 			title: "Test Client with Authorization",
 			base: base_path,
             path: "client",
+            docs: "",
+			params: "",
+            headers: [],
+			body: "",
+            expected_status: 200
+		}));
+	});
+
+	app.get('/goto', function(req, res) {
+		res.send(nunjucks.render('templates/apitestgoto.njk', { 
+			title: "GoTo Client with Authorization",
+			base: base_path,
+            path: "goto",
             docs: "",
 			params: "",
             headers: [],

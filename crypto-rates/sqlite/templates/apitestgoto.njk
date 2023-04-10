@@ -1,0 +1,251 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv='Content-Type' content='text/html;charset=UTF-8' />
+<title>web</title>
+<script>
+(function () {
+	var onWindowLoad = function () {
+		
+		var loadScript = function (src, callback) {
+		
+			var element = document.createElement("script");
+				element.src = src;
+				element.async = true;
+				document.body.appendChild(element);
+				
+				if (callback) {
+				
+					element.onreadystatechange = function () {
+						if (this.readyState === "loaded" || this.readyState === "complete") { 
+							callback();
+						}
+					};
+					element.onload = callback;
+				}
+		},
+		
+		loadArticleScript = function () {
+			checkForAuthToken();
+		};
+		loadScript("https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js", loadArticleScript);
+	};
+
+	if (window.addEventListener) {
+		window.addEventListener("load", onWindowLoad, false);
+	} else if (window.attachEvent) {
+		window.attachEvent("onload", onWindowLoad);
+	} else {
+		window.onload = onWindowLoad;
+	}
+}());			
+</script>
+
+<script>
+
+var bearerToken = "I am a BEARer";
+
+function checkForAuthToken()
+{
+	bearerToken = getCookie("access_token");
+
+	if (bearerToken != "") {
+		document.getElementById("bearertoken").value = bearerToken;
+
+	} else {
+		document.getElementById("bearertoken").value = "Click Auth to get a valid bearer token.\nThen return here and reload the page.";
+	}
+}
+
+function randomIntFromInterval(min,max)
+{
+    return Math.floor(Math.random()*(max-min+1)+min);
+}
+var request_output = "";
+
+function encodeForBasicAuth(username,password)
+{
+	return "Basic " + btoa(username + ":" + password);
+}
+
+function dumpResponseHeaders(xhr_obj) {
+    var hdr_out = "";
+    hdr_out += "Response Headers\n";
+    hdr_out += "\n";
+    var headers = xhr_obj.getAllResponseHeaders();
+    return (hdr_out + headers + "\n");
+}
+
+var request_hdrs = 
+[
+];
+
+
+var request_obj = 
+{
+};
+
+</script>
+
+</head>
+<body style="font-family: Tahoma, Geneva, sans-serif">
+<strong>{{title}}</strong><br />
+<br />
+<a href="{{docs}}" target="docs">Docs Link</a><br />
+
+<table border="0" cellspacing="1" cellpadding="2">
+<tr><th align="right">Name</th><th>Description</th></tr>
+<tr><td align="right"><a href="/oauth/test-token" target="getauth">Auth</a></td><td><textarea rows="4" cols="60" id="bearertoken" disabled>No Bearer Token Found.</textarea></td></tr>
+<!-- <tr><td align="right">Body</td><td><textarea rows="14" cols="60" id="postbody">{{body}}</textarea></td></tr> -->
+<tr><td align="right">&nbsp;</td><td><button id="previewGet" type="button" onclick="previewGet()">Preview Get</button><button id="testGet" type="button" onclick="testGet()">Test Get</button></td><tr>
+</table>
+
+<script type="text/javascript">
+
+function getCookie(cname) {
+  let name = cname + "=";
+  let ca = document.cookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) == 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
+function previewGet()
+{
+	var username = "";
+	var password = "";
+
+	request_hdrs = [];
+
+	bearerToken = getCookie("access_token");
+
+	if (bearerToken != "") {
+		request_hdrs.push( { "Authorization": "Bearer " + bearerToken } );
+	}
+
+	request_output = "";
+	request_output += "POST to {{base}}/{{path}} \n";
+	{% for header in headers %}
+	{% if header.name == "Authorization" %}
+	// request_output += "Request Header: Authorization = " + encodeForBasicAuth(username,password) + " \n";
+	request_hdrs.push( { "{{ header.name }}": encodeForBasicAuth(username,password) } );
+	{% else %}
+	// request_output += "Request Header: {{ header.name }} = {{ header.value }} \n";
+	request_hdrs.push( { "{{ header.name }}": "{{ header.value }}" } );
+	{% endif %}
+	{% endfor %}
+
+	// Display the request
+
+	// request_hdrs.forEach(function(hdr){
+	//	request_output += "Req Hdr: " + JSON.stringify(hdr) + "\n";
+	//});
+	
+	// request_obj = JSON.parse(document.getElementById("postbody").value);
+
+	var pathAndParams = '{{base}}/{{path}}' + '?' + '{{params}}';
+
+	document.getElementById("request_content").innerHTML = "<pre>\n" + "Headers:" + "\n" + JSON.stringify(request_hdrs, null, 2) + "\n\n" + "pathAndParams:" + "\n" + pathAndParams + "</pre>\n";
+
+}
+
+function testGet()
+{
+	previewGet();
+
+	var pathAndParams = '{{base}}/{{path}}' + '?' + '{{params}}';
+
+	xhr = new XMLHttpRequest();
+	xhr.open('GET', pathAndParams);
+
+//	{% for header in headers %}
+//	xhr.setRequestHeader('{{ header.name }}', '{{ header.value }}');
+//	{% endfor %}
+
+	request_hdrs.forEach(function(hdr){
+		request_output += "Req Hdr: " + JSON.stringify(hdr) + "\n";
+		let hdrArr = Object.entries(hdr);
+		for ([key, value] of hdrArr){
+			xhr.setRequestHeader(key, value);
+		}
+	});
+
+	xhr.onload = function() {
+		// document.getElementById("response_content").innerHTML = "<pre>\n" + xhr.status + " : " + xhr.statusText + "\n" + xhr.responseText + "</pre>\n";
+
+		if (true) {
+		//if (xhr.status === {{expected_status}}) {
+
+			var isJsonBody = false;
+			var headers = xhr.getAllResponseHeaders();
+			const hdrs = headers.split('\r\n');
+			hdrs.forEach(function(hdr){
+				var parts = hdr.split(':');
+				if (parts[0] == "content-type") {
+					var bits = parts[1].split(';');
+					if (bits[0].trim() == "application/json") {
+						isJsonBody = true;
+					}
+				}
+			});
+
+			if (isJsonBody) {
+				var jsonBody = JSON.parse(xhr.responseText);
+				let bodyArr = Object.entries(jsonBody);
+				var isBearer = false;
+				for ([key, value] of bodyArr){
+					if ((key == "token_type") && (value == "bearer")) {
+						isBearer = true;
+					} else {
+						if ((key == "access_token") && (isBearer)) {
+							document.cookie = "access_token=" + value + "; path=/";
+						}
+					}
+					
+				}
+				document.getElementById("response_content").innerHTML = "<pre>\n" + "Status: " + xhr.status + "\n\n" + dumpResponseHeaders(xhr) + "Response Body: \n" + JSON.stringify(JSON.parse(xhr.responseText), null, 2) + "</pre>\n";
+			} else {
+				document.getElementById("response_content").innerHTML = "<pre>\n" + "Status: " + xhr.status + "\n\n" + dumpResponseHeaders(xhr) + "Response Body: \n" + xhr.responseText + "</pre>\n";
+			}
+		}
+
+	};
+
+	xhr.send();
+
+	//xhr.close();
+	
+}
+
+</script>
+
+
+<p>===Begin Request===</p>
+<div id="request_content">
+No request sent yet.    
+</div>
+<p>===End Request===</p>
+<p>===Begin Response===</p>
+<div id="response_content">
+No results returned yet.    
+</div>
+<p>===End Response===</p>
+
+<script>
+// Display the request
+document.getElementById("request_content").innerHTML = "<pre>\n" + request_output + "\n" + JSON.stringify(request_obj, null, 2) + "</pre>\n";
+
+// Send the Ajax Request.
+//xhr.send(JSON.stringify(request_obj));
+</script>
+
+</body>
+</html>

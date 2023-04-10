@@ -218,9 +218,21 @@ const wsServer = new ws.Server({ noServer: true });
 
 var client_cnt = 0;
 
-wsServer.on('connection', socket => {
+wsServer.on('connection', (socket, req) => {
+
     console.log('New Client Joining...');
-        
+    const searchParams = new URLSearchParams(req.url);
+    console.log(searchParams.getAll("tenantid"));
+    console.log('token: ' + JSON.stringify(req.url,null,2));
+    const qparts = req.url.split("=");
+    console.log('qparts: ' + JSON.stringify(qparts,null,2));
+
+    if (qparts[0] == "/?tenantid") {
+        socket['tenantid']= qparts[1];
+    } else {
+        socket['tenantid']= 'unknown';
+    }
+
     client_cnt = 0;
     wsServer.clients.forEach(client => {
         client_cnt++;
@@ -277,7 +289,7 @@ wsServer.on('connection', socket => {
     });
 
     // --- Uncomment for /socket/chart
-    var intervalID = setInterval(myCallback, 1000);
+    var intervalID = setInterval(myCallback, 2000);
 
     function myCallback() {
         getTemp(deviceId).then((t)=>{
@@ -321,9 +333,23 @@ function broadcast(data) {
     var idx = 1;
     wsServer.clients.forEach(client => {
         // console.log("client: " + JSON.stringify(client, null, 2));
-        // console.log("client: " + idx);
+        console.log("client: " + idx + " " + client.tenantid);
 
         if (client.readyState === ws.OPEN) {
+            client.send(data);
+        }
+        idx++;
+    });
+}
+
+function notify_tenant(tenantid,data) {
+
+    var idx = 1;
+    wsServer.clients.forEach(client => {
+        // console.log("client: " + JSON.stringify(client, null, 2));
+        console.log("client: " + idx + " " + client.tenantid);
+
+        if ((client.tenantid == tenantid) && (client.readyState === ws.OPEN)) {
             client.send(data);
         }
         idx++;

@@ -30,9 +30,9 @@
         "jquery": "^3.2.1",
         "@alunde/oauth20-provider": "^0.6.0",
         "cookie-parser": "*",
-        "moment": "^2.10.3"
-    
-
+        "moment": "^2.10.3",
+        "ln-service": "latest",
+        "kraken-api": "latest"
     },
     "scripts": {
         "debug": "nodemon -e js,njk server.js",

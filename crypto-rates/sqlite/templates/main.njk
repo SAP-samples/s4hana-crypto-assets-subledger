@@ -24,6 +24,25 @@ connection.onmessage = event => {
     // document.querySelector("#chat").append(li);
     let nick = document.querySelector("#nick").value;
     
+    // Attempt to parse as JSON
+    try {
+        var json = JSON.parse(event.data);
+        if (json.type == "invoice") {
+                console.log("Invoice Sent!");
+                document.getElementById("invoice").innerHTML = json.invoice;
+                testLN04();
+        } else {
+            var logger = document.querySelector("#logger");
+            logger.innerHTML = logger.innerHTML + "\n" + event.data;
+            logger.scrollTop = logger.scrollHeight;
+        }
+        return;
+    } catch (e) {
+        console.log("not json");
+    }
+
+
+/*
     if (event.data.substring(2,7) == ":INV:") {
         if (event.data.substring(0,2) == nick) {
             alert("Invoice Sent!");
@@ -36,6 +55,7 @@ connection.onmessage = event => {
         logger.innerHTML = logger.innerHTML + "\n" + event.data;
         logger.scrollTop = logger.scrollHeight;
     }
+*/
 
 };
 

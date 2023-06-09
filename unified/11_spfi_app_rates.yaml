@@ -1,0 +1,36 @@
+apiVersion: provisioning.api.sap/v1alpha1
+type: SPFIApplication
+metadata: 
+  name: casrates # provide a unique name for the application; required
+  path: /sap/btp/pes/crypto-assets-subledger/rates/rates-resource-group # provide the full path to resource group; required
+spec:
+  endpoint: https://cryptorates-crypto-rates-app.cryptoassetssubledger.com/index.html
+            # provide a notify endpoint URL with https;
+            # provide only host base url as SPFI semantics will be added by unified provisioning
+            # required 
+            # Example: 
+            # The fully qualified URL:   https://host.com/saas/spfi/notify 
+            # then provide endpoint as : https://host.com/saas
+  productType: # provide the tenant product type in CRM for your application 
+               # optional 
+  instanceType: # provide the type as required for Unified Metering  
+                # optional
+  instanceIdBy: # provide the metering service instance identification attribute
+               # default is tenantId (CRM tenant Id)
+               # allowed values ( tenantId, externalId)
+               # tenantId - Instance identifier will be CRM tenant ID
+               # externalId - Instance identifier will be BTP Subaccount ID
+               # optional , defaulted to CRM tenant ID if the value is not specified.
+  productIds: # Provide the associated SKU value for this application.
+              # It is an array of SKU Ids
+              # optional for Unified Provisioning level testing
+              # mandatory for E2E testing and golive/productive usage
+  trustDetails:
+    operation:
+      clientId: # provide the client id; required
+      issuerName: #  Provide your IAS tenant host url; required
+  assignTo: # list of paths to resource group, folder, or organization where the SPFI tenant can be freely provisioned 
+            # without actualy buying it. 
+            # This is for provider flexibility to test their application provisioning flows in mock customer 
+            # organization or any other suitable usecase.
+    - ""

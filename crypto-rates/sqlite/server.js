@@ -28,7 +28,161 @@ app.use(passport.initialize());
 // }));
 var PassportAuthenticateMiddleware = passport.authenticate('JWT', {session:false});
 
+const {authenticatedLndGrpc} = require('ln-service');
+const {getWalletInfo} = require('ln-service');
+const {getInvoices} = require('ln-service');
+const {createInvoice} = require('ln-service');
 
+// Edit /Users/i830671/.bos/ragnar/credentials.json etc.
+
+const cert = process.env[`LND_TLS_CERT`];       // export LND_TLS_CERT=$(cat ~/.bos/ragnar/credentials.json | jq -r '.cert')
+const macaroon = process.env[`LND_MACAROON`];   // export LND_MACAROON=$(cat ~/.bos/ragnar/credentials.json | jq -r '.macaroon')
+const socket = process.env[`LND_GRPC_HOST`];    // export LND_GRPC_HOST=$(cat ~/.bos/ragnar/credentials.json | jq -r '.socket')
+
+// echo $LND_TLS_CERT
+// echo $LND_MACAROON
+// echo $LND_GRPC_HOST
+
+// lncli --rpcserver=IP_ADDRESS:GRPC_PORT --tlscertpath=./../tls.cert --macaroonpath=./../admin.macaroon
+
+// GLOBAL OPTIONS:
+//    --rpcserver value          The host:port of LN daemon. (default: "localhost:10009")
+//    --tlscertpath value        The path to lnd's TLS certificate. (default: "/Users/i830671/Library/Application Support/Lnd/tls.cert")
+//    --no-macaroons             Disable macaroon authentication.
+//    --macaroonpath value       The path to macaroon file.
+
+// ./lncli --rpcserver=ragnar:10009 --tlscertpath=./tls.cert --macaroonpath=./admin.macaroon getinfo
+// base64 -w0 admin.macaroon
+
+// Create a new LND gRPC API client
+// const lnd = lnService.authenticatedLndGrpc({
+//   cert: './tls.cert', // scp ragnar:/t4/lnd/tls.cert .
+//   macaroon: './admin.macaroon', // scp ragnar:/t4/lnd/data/chain/bitcoin/mainnet/admin.macaroon .
+//   socket: 'ragnar:10009'
+// })
+
+let lnd;
+try {
+    lnd = authenticatedLndGrpc({ cert, macaroon, socket }).lnd;
+} catch (err) {
+    throw new Error('FailedToInstantiateDaemon');
+}
+ 
+// https://github.com/alexbosworth/ln-service#all-methods
+
+// Get info about the Lightning node
+async function getNodeInfo() {
+    try {
+        const walletInfo = await getWalletInfo({ lnd });
+        // console.log(`info: ${JSON.stringify(walletInfo, null, 2)}`);
+        console.log(`lightning node: ${JSON.stringify(walletInfo.alias, null, 2)}`);
+        console.log(`is_synced_to_chain: ${JSON.stringify(walletInfo.is_synced_to_chain, null, 2)}`);
+        console.log(`is_synced_to_graph: ${JSON.stringify(walletInfo.is_synced_to_graph, null, 2)}`);
+        console.log(`peers_count: ${JSON.stringify(walletInfo.peers_count, null, 2)}`);
+        console.log(`public_key: ${JSON.stringify(walletInfo.public_key, null, 2)}`);
+        // getInvoicesInfo();
+        // getInvoiceInfo("610ad3927a63cd405c149ab79f0200e8c6224abc2940ff41154fb0a8829f287e");
+    } catch (err) {
+        console.error(`Error getting node info: ${err.message}`)
+    }
+}
+
+// Get info about ALL Invoices
+async function getInvoicesInfo() {
+    try {
+        const { invoices } = await getInvoices({ lnd });
+        console.log(`invoices: ${JSON.stringify(invoices, null, 2)}`);
+    } catch (err) {
+        console.error(`Error getting invoices info: ${err.message}`)
+    }
+}
+
+const {getInvoice} = require('ln-service');
+
+// Get info about a specific Invoice
+async function getInvoiceInfo(id) {
+    console.log(`Getting invoice info for ${id}...`);
+    try {
+        const invoice = await getInvoice({ id: id, lnd: lnd });
+        // console.log(`invoice: ${JSON.stringify(invoice, null, 2)}`);
+        return invoice;
+    } catch (err) {
+        console.error(`Error getting invoice info: ${err.message}`)
+    }
+}
+
+// Create a new Invoice
+// https://github.com/alexbosworth/ln-service#createinvoice
+
+// {
+//     [cltv_delta]: <CLTV Delta Number>
+//     [description]: <Invoice Description String>
+//     [description_hash]: <Hashed Description of Payment Hex String>
+//     [expires_at]: <Expires At ISO 8601 Date String>
+//     [is_fallback_included]: <Is Fallback Address Included Bool>
+//     [is_fallback_nested]: <Is Fallback Address Nested Bool>
+//     [is_including_private_channels]: <Invoice Includes Private Channels Bool>
+//     lnd: <Authenticated LND API Object>
+//     [secret]: <Payment Preimage Hex String>
+//     [mtokens]: <Millitokens String>
+//     [tokens]: <Tokens Number>
+// }
+
+// https://github.com/alexbosworth/ln-service#subscribetoinvoice
+
+const {subscribeToInvoice} = require('ln-service');
+
+const {once} = require('events');
+
+async function subToInvoice(id) {
+    console.log(`Waiting for Payment...`);
+    try {
+        const sub = subscribeToInvoice({ id: id, lnd: lnd });
+        const [invoice] = await once(sub, 'invoice_updated');
+        console.log(`invoice: ${JSON.stringify(invoice, null, 2)}`);
+    } catch (err) {
+        console.error(`Error creating invoice info: ${err.message}`)
+    }
+}
+
+var myEventHandler = function (invoice) {
+    console.log(`invoice: ${JSON.stringify(invoice, null, 2)}`);
+}
+
+const {on} = require('events');
+
+async function waitForPayment(id) {
+    console.log(`Waiting for payment for invoice ${id}...`);
+    try {
+        const sub = subscribeToInvoice({ id: id, lnd: lnd });
+        // on(sub, 'invoice_updated', myEventHandler);
+        sub.on('invoice_updated', myEventHandler);
+        console.log(`Registered on handler for invoice ${id}...`);
+        // console.log(`invoice: ${JSON.stringify(invoice, null, 2)}`);
+    } catch (err) {
+        console.error(`Error waiting on invoice payment: ${err.message}`)
+    }
+}
+
+async function getNewInvoiceInfo(inv) {
+    console.log(`Creating New Invoice...`);
+    try {
+        const invoice = await createInvoice(inv);
+        console.log(`invoice: ${JSON.stringify(invoice, null, 2)}`);
+        // subToInvoice(invoice.id);
+        waitForPayment(invoice.id);
+    } catch (err) {
+        console.error(`Error creating invoice info: ${err.message}`)
+    }
+}
+
+console.log('Getting node info...');
+getNodeInfo();
+// getNewInvoiceInfo({lnd: lnd, tokens: 19, description: "test invoice 19"});
+
+// let inv = getInvoiceInfo("3b4d9b2dc0a1ed3456b2fceab3c6b07e76d2e3d09166be617a2820b4ac3ddde5");
+// console.log(`invoice: ${JSON.stringify(inv.request, null, 2)}`);
+  
 // Run tests via "npm --type=TYPE test" (types available: memory (default), redis are available)
 var TYPE = process.env['npm_config_type'] || 'memory';
 
@@ -312,6 +466,33 @@ wsServer.on('connection', (socket, req) => {
     })
     }
     // ---
+
+    // Enable to peridically send an invoice for testing
+    // var intervalInvoice = setInterval(myInvoice, 10000);
+
+    function myInvoice() {
+        getInvoice(deviceId).then((inv)=>{
+        socket.send(JSON.stringify({
+        "type": "invoice",
+        "invoice": inv
+        }))
+
+    })
+    }
+
+    
+    function getInvoice(d) {
+        console.log('getInvoice...');
+        return new Promise((resolve, reject) => {
+            console.log('In Promise...');
+            ////let inv = getInvoiceInfo("3b4d9b2dc0a1ed3456b2fceab3c6b07e76d2e3d09166be617a2820b4ac3ddde5");
+            // let t = inv.request;
+            let t = "lnbc190n1pjgy36fpp5dglatu3prge5qxnyuhgrxx0mflmm0x82yh3y2hd4e0lsfhvm7ldqdqcw3jhxapqd9h8vmmfvdjjqvfecqzzsxqr23ssp5pn27g6zvkjzpzpkj2x067wfcmghp0wuw4f3h088ljgh5kd5gnu3s9qyyssq2tk37wk2fry5gdjn9e6zd4e684sgfc8qryg0434w9xzhxdwkn32xc65xj7gpjcsjkpaneljwqxcxt85rm29rg5vxa4zlmk6fj82f3zgq0gqezp";
+            resolve(t);
+            console.log('End Promise...');
+        })
+    }
+
     
     socket.on('close', function close() {
         console.log('Disconnected...');

@@ -122,6 +122,7 @@ module.exports = () => {
 		// 	console.log(item);
 		// });
 
+        // This is behind the SAP firewall.  Partners will not be able to access this.
 // curl -X 'POST' \
 // 'https://github.wdf.sap.corp/spfi/notify' \
 //  -H 'accept: */*' \

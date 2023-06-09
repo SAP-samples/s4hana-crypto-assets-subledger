@@ -39,6 +39,22 @@ Looks like this may be set up enough for a start.  Maybe revisit later.
 atomctl show-tree folder crypto-assets-subledger -p /sap/btp/pes --types binding
 ```
 
+View the structure
+```
+atomctl show-tree folder crypto-assets-subledger -p /sap/btp/pes
+```
+
 https://pages.github.tools.sap/atom-cfs/atom-docs/docs/providing-services/registering-services/unified-provisioning/about-unified-provisioning/spfiapi/
 
+
+You can run this command to get all path bindings in your organization:
+```
+atomctl get pathbindings.policies-control.resource.api.sap --path /sap/btp/pes/crypto-assets-subledger
+```
+Providing Services
+https://pages.github.tools.sap/atom-cfs/atom-docs/docs/providing-services/
+
+
+Registereing Services
+https://pages.github.tools.sap/atom-cfs/atom-docs/docs/providing-services/registering-services/unified-provisioning/onboarding-application/register-application-in-atom/
 

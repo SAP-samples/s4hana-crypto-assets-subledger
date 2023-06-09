@@ -15,6 +15,10 @@ const base_path = "/rates";
 
 const db = require('../../library');
 
+const ln = require('../../libln');
+
+const exchange = require('../../libexchange');
+
 // https://github.com/TryGhost/node-sqlite3/wiki/API#allparam---callback
 
 module.exports = () => {
@@ -245,14 +249,16 @@ module.exports = () => {
 		}));
 
 	});
-
+	
 	var TYPE = process.env['npm_config_type'] || 'memory';
 
 	TYPE = "sqlite";
 	
 	var oauth20     = require('./../../oauth20.js')(TYPE);
 
-	app.post('/downloadCryptoData', oauth20.middleware.bearer, function (req, res) {
+	const sleep = (waitTimeInMs) => new Promise(resolve => setTimeout(resolve, waitTimeInMs));
+
+	app.post('/downloadCryptoData', oauth20.middleware.bearer, async function (req, res) {
 		
 		// Check for valid access token
 		if (!req.oauth2.accessToken) {
@@ -264,12 +270,37 @@ module.exports = () => {
 			var tenant = db.getTenantByID(tenantID);
 			var quoteCost = 1000;	// Estimate of quote cost in satoshis
 
+			// Simulate a delay in generating the response
+			// const simsecs = 30	// Usually times out
+			// const simsecs = 29	// Just under normal browser timeout
+			const simsecs = 1	// A reasonable round trip time. Overhead is about 0.45 seconds
+			console.log("Waiting " + simsecs + " seconds.");
+			await sleep(simsecs * 1000); // sleep for simsecs seconds
+			res.setHeader('Server-Timing', 'delay;dur=' + (simsecs * 1000) + ', ' + 'app;dur=' + '1984' + ', ' + 'other;dur=' + '101');
+			console.log(simsecs + " seconds later.");
+
 			if ((tenant) && (typeof tenant == "object")) {
 
 				// Make an estimate of what the crypto rate request will cost
 				// quoteCost = getQuoteCost(req.body);
-
+				const startdate = new Date()
 				
+				const nodeinfo = await ln.getNodeInfo();
+				console.log(`ln: ${JSON.stringify(nodeinfo.alias, null, 2)}`);
+
+				const enddate = new Date()
+				const duration = enddate - startdate;
+
+				const quote = await exchange.getQuote("EUR~USD");
+				console.log(`quote: ${JSON.stringify(quote, null, 2)}`);
+				
+				const enddate2 = new Date()
+				const duration2 = enddate2 - enddate;
+
+				res.setHeader('Server-Timing', 'ln;dur=' + duration + ', ' + 'ex;dur=' + duration2);
+
+				tenant.satoshi = quote;
+
 				// What plan are they on?  Free, Monthly?
 				if (tenant.plan == "F") {
 					// Need to decide if we want to fetch first and invoice after or invoice first
@@ -282,6 +313,7 @@ module.exports = () => {
 					} else {
 						// Check if they have a lightning wallet registered
 						if (tenant.pubkey !== "") {
+
 							// Check if the last lightning invoice was paid properly
 
 							// Check to see if this tenant has an established socket connection

@@ -35,9 +35,35 @@ const {createInvoice} = require('ln-service');
 
 // Edit /Users/i830671/.bos/ragnar/credentials.json etc.
 
-const cert = process.env[`LND_TLS_CERT`];       // export LND_TLS_CERT=$(cat ~/.bos/ragnar/credentials.json | jq -r '.cert')
-const macaroon = process.env[`LND_MACAROON`];   // export LND_MACAROON=$(cat ~/.bos/ragnar/credentials.json | jq -r '.macaroon')
-const socket = process.env[`LND_GRPC_HOST`];    // export LND_GRPC_HOST=$(cat ~/.bos/ragnar/credentials.json | jq -r '.socket')
+var cert = process.env[`LND_TLS_CERT`];       // export LND_TLS_CERT=$(cat ~/.bos/ragnar/credentials.json | jq -r '.cert')
+var macaroon = process.env[`LND_MACAROON`];   // export LND_MACAROON=$(cat ~/.bos/ragnar/credentials.json | jq -r '.macaroon')
+var socket = process.env[`LND_GRPC_HOST`];    // export LND_GRPC_HOST=$(cat ~/.bos/ragnar/credentials.json | jq -r '.socket')
+
+const homedir = process.env[`HOME`];
+const bosnode = process.env[`BOS_DEFAULT_SAVED_NODE`];
+
+const fs = require('fs');
+
+function readFileIntoJSONObject(filename) {
+  try {
+    const fileContent = fs.readFileSync(filename, 'utf8');
+    const jsonObject = JSON.parse(fileContent);
+    return jsonObject;
+  } catch (error) {
+    throw new Error(`Error reading file: ${error.message}`);
+  }
+}
+
+// Example usage
+var filename = homedir + '/.bos/config.json';
+const bosconfig = readFileIntoJSONObject(filename);
+filename = homedir + '/.bos/' + bosconfig.default_saved_node + '/credentials.json';
+const boscreds = readFileIntoJSONObject(filename);
+// console.log(boscreds);
+
+cert = boscreds.cert;
+macaroon = boscreds.macaroon;
+socket = boscreds.socket;
 
 // echo $LND_TLS_CERT
 // echo $LND_MACAROON
@@ -63,6 +89,7 @@ const socket = process.env[`LND_GRPC_HOST`];    // export LND_GRPC_HOST=$(cat ~/
 
 let lnd;
 try {
+    console.log(`authenticatedLndGrpc`);
     lnd = authenticatedLndGrpc({ cert, macaroon, socket }).lnd;
 } catch (err) {
     throw new Error('FailedToInstantiateDaemon');
@@ -73,6 +100,7 @@ try {
 // Get info about the Lightning node
 async function getNodeInfo() {
     try {
+        console.log(`getWalletInfo`);
         const walletInfo = await getWalletInfo({ lnd });
         // console.log(`info: ${JSON.stringify(walletInfo, null, 2)}`);
         console.log(`lightning node: ${JSON.stringify(walletInfo.alias, null, 2)}`);

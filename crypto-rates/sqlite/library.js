@@ -2,6 +2,7 @@ module.exports = {
     init: init,
     drop: drop,
     prepare: prepare,
+	preparer: preparer,
 	check_nick_exists: check_nick_exists,
     tenant_register: tenant_register,
     tenant_unregister: tenant_unregister,
@@ -164,6 +165,28 @@ function init() {
     info = stmt.run();
     console.log(info.changes);
 
+	createstr  = 'CREATE TABLE IF NOT EXISTS pending_payments (';
+	createstr += 'tenant CHAR(36) NOT NULL, ';	// "1234567890123456789012345678901234567890123456789012345678901234"
+	createstr += 'invoice CHAR(64) NOT NULL, ';	// "bfa5d543c695f89bfe75ac7fc8076be5ccb8811b3be5dddff9e1d97503425de3"
+	createstr += 'created DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL';
+	createstr += ')';
+
+    stmt = db.prepare(createstr);
+    info = stmt.run();
+    console.log(info.changes);
+
+	// createstr  = 'CREATE TABLE IF NOT EXISTS socket_connections (';
+	// createstr += 'id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, ';
+	// createstr += 'nick VARCHAR(20), ';
+	// createstr += 'pubkey CHAR(66), ';
+	// createstr += 'created DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL ';
+	// createstr += ')';
+	
+    // stmt = db.prepare(createstr);
+    // info = stmt.run();
+    // console.log(info.changes);
+
+
 // aef487d1-0879-4fb1-a8f4-2384b71226c2 CHAR(36)
 
     //db.close();
@@ -215,18 +238,18 @@ function prepare(sqlinput) {
 
 		var sqlin = sqlinput.trim();
 
-		console.log("  sqlin:" + sqlin + ":");
+		// console.log("  sqlin:" + sqlin + ":");
 
 		switch((sqlin.substring(0,6)).toUpperCase()) {
 			case "SELECT":
-				console.log("SELECT!");
+				// console.log("SELECT!");
 				// `SELECT rate, created FROM rates`
 				sqlout = sqlin;
 				// `SELECT rate, created FROM rates WHERE tenant = tenantID`
 				sqlout += " WHERE tenant = '" + gtid + "'";
 				break;
 			case "INSERT":
-				console.log("INSERT!");
+				// console.log("INSERT!");
 				// `INSERT INTO rates (rate) VALUES (?)`
 				var columnsLeftParamIdx = sqlin.indexOf('(');
 				var valuesLeftParamIdx = sqlin.indexOf('(', (columnsLeftParamIdx + 1));
@@ -239,7 +262,7 @@ function prepare(sqlinput) {
 				// `INSERT INTO rates (tenant,rate) VALUES (tenantID,?)`
 				break;
 			case "DELETE":
-				console.log("DELETE!");
+				// console.log("DELETE!");
 				// `SELECT rate, created FROM rates`
 				sqlout = sqlin;
 				// `SELECT rate, created FROM rates WHERE tenant = tenantID`
@@ -250,7 +273,24 @@ function prepare(sqlinput) {
             default:
 				break;
 		}
-		console.log(" sqlout:" + sqlout + ":");
+		// console.log(" sqlout:" + sqlout + ":");
+	}
+
+	return db.prepare(sqlout);
+}
+
+function preparer(sqlinput) {
+	var sqlout = 'SELECT now()';
+
+	if (true) {
+
+		var sqlin = sqlinput.trim();
+
+		// console.log("  sqlin:" + sqlin + ":");
+
+		sqlout = sqlin;
+
+		// console.log(" sqlout:" + sqlout + ":");
 	}
 
 	return db.prepare(sqlout);
@@ -322,7 +362,7 @@ function getTenantByID(tenantID) {
 
 	if ((tenant) && (typeof tenant == "object")) {
 
-		console.log("tenant: " + JSON.stringify(tenant,null,2));
+		// console.log("tenant: " + JSON.stringify(tenant,null,2));
 		return tenant;
 
 	} else {

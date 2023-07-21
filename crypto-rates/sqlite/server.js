@@ -1,3 +1,7 @@
+module.exports = {
+	sendInvoice: sendInvoice
+};
+
 const express = require('express');
 const session = require('express-session');
 
@@ -40,30 +44,87 @@ var macaroon = process.env[`LND_MACAROON`];   // export LND_MACAROON=$(cat ~/.bo
 var socket = process.env[`LND_GRPC_HOST`];    // export LND_GRPC_HOST=$(cat ~/.bos/ragnar/credentials.json | jq -r '.socket')
 
 const homedir = process.env[`HOME`];
-const bosnode = process.env[`BOS_DEFAULT_SAVED_NODE`];
+var bosnode = process.env[`BOS_DEFAULT_SAVED_NODE`];
 
 const fs = require('fs');
 
 function readFileIntoJSONObject(filename) {
-  try {
+    try {
     const fileContent = fs.readFileSync(filename, 'utf8');
     const jsonObject = JSON.parse(fileContent);
     return jsonObject;
-  } catch (error) {
+    } catch (error) {
     throw new Error(`Error reading file: ${error.message}`);
-  }
+    }
 }
+
+function checkFileExists(filePath) {
+    try {
+        fs.accessSync(filePath);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+  
+function shortenString(str) {
+    if (str.length <= 12) {
+      return str;
+    }
+  
+    const first = str.substring(0, 6);
+    const last = str.substring(str.length - 3);
+  
+    const dots = '.'.repeat(3);
+  
+    return `${first}${dots}${last}`;
+}
+
+var bosconfig = {};
+var boscreds = {};
 
 // Example usage
 var filename = homedir + '/.bos/config.json';
-const bosconfig = readFileIntoJSONObject(filename);
-filename = homedir + '/.bos/' + bosconfig.default_saved_node + '/credentials.json';
-const boscreds = readFileIntoJSONObject(filename);
-// console.log(boscreds);
+if (checkFileExists(filename)) {
+    bosconfig = readFileIntoJSONObject(filename);
+    if ((typeof bosconfig == "object") && (typeof bosconfig.default_saved_node == "string")) {
+        bosnode = bosconfig.default_saved_node;
+    }
+}
 
-cert = boscreds.cert;
-macaroon = boscreds.macaroon;
-socket = boscreds.socket;
+console.log("bosnode: " + bosnode);
+
+filename = homedir + '/.bos/' + bosnode + '/credentials.json';
+if (checkFileExists(filename)) {
+    boscreds = readFileIntoJSONObject(filename);
+    if (typeof boscreds == "object") {
+        console.log("reading boscreds: ");
+        if (typeof boscreds.cert == "string") {
+            cert = boscreds.cert;
+        }
+        if (typeof boscreds.macaroon == "string") {
+            macaroon = boscreds.macaroon;
+        }
+        if (typeof boscreds.socket == "string") {
+           socket = boscreds.socket;
+        }        
+    }
+} else {
+    console.log("Getting LND details from ENV");
+}
+
+//const {exit} = require('process');
+
+if (cert && macaroon && socket) {
+    console.log("cert: " + shortenString(cert));
+    console.log("macaroon: " + shortenString(macaroon));
+    console.log("socket: " + socket);
+} else {
+    console.log("Either export LND_TLS_CERT, LND_TLS_CERT and LND_TLS_CERT -OR- The method described at https://github.com/andrewlunde/balanceofsatoshis#saved-nodes");
+    process.exit(1);
+}
+ 
+// console.log(boscreds);
 
 // echo $LND_TLS_CERT
 // echo $LND_MACAROON
@@ -87,7 +148,8 @@ socket = boscreds.socket;
 //   socket: 'ragnar:10009'
 // })
 
-let lnd;
+global.lnd = {};
+
 try {
     console.log(`authenticatedLndGrpc`);
     lnd = authenticatedLndGrpc({ cert, macaroon, socket }).lnd;
@@ -97,120 +159,21 @@ try {
  
 // https://github.com/alexbosworth/ln-service#all-methods
 
-// Get info about the Lightning node
-async function getNodeInfo() {
-    try {
-        console.log(`getWalletInfo`);
-        const walletInfo = await getWalletInfo({ lnd });
-        // console.log(`info: ${JSON.stringify(walletInfo, null, 2)}`);
-        console.log(`lightning node: ${JSON.stringify(walletInfo.alias, null, 2)}`);
-        console.log(`is_synced_to_chain: ${JSON.stringify(walletInfo.is_synced_to_chain, null, 2)}`);
-        console.log(`is_synced_to_graph: ${JSON.stringify(walletInfo.is_synced_to_graph, null, 2)}`);
-        console.log(`peers_count: ${JSON.stringify(walletInfo.peers_count, null, 2)}`);
-        console.log(`public_key: ${JSON.stringify(walletInfo.public_key, null, 2)}`);
-        // getInvoicesInfo();
-        // getInvoiceInfo("610ad3927a63cd405c149ab79f0200e8c6224abc2940ff41154fb0a8829f287e");
-    } catch (err) {
-        console.error(`Error getting node info: ${err.message}`)
-    }
-}
-
-// Get info about ALL Invoices
-async function getInvoicesInfo() {
-    try {
-        const { invoices } = await getInvoices({ lnd });
-        console.log(`invoices: ${JSON.stringify(invoices, null, 2)}`);
-    } catch (err) {
-        console.error(`Error getting invoices info: ${err.message}`)
-    }
-}
-
-const {getInvoice} = require('ln-service');
-
-// Get info about a specific Invoice
-async function getInvoiceInfo(id) {
-    console.log(`Getting invoice info for ${id}...`);
-    try {
-        const invoice = await getInvoice({ id: id, lnd: lnd });
-        // console.log(`invoice: ${JSON.stringify(invoice, null, 2)}`);
-        return invoice;
-    } catch (err) {
-        console.error(`Error getting invoice info: ${err.message}`)
-    }
-}
-
-// Create a new Invoice
-// https://github.com/alexbosworth/ln-service#createinvoice
-
-// {
-//     [cltv_delta]: <CLTV Delta Number>
-//     [description]: <Invoice Description String>
-//     [description_hash]: <Hashed Description of Payment Hex String>
-//     [expires_at]: <Expires At ISO 8601 Date String>
-//     [is_fallback_included]: <Is Fallback Address Included Bool>
-//     [is_fallback_nested]: <Is Fallback Address Nested Bool>
-//     [is_including_private_channels]: <Invoice Includes Private Channels Bool>
-//     lnd: <Authenticated LND API Object>
-//     [secret]: <Payment Preimage Hex String>
-//     [mtokens]: <Millitokens String>
-//     [tokens]: <Tokens Number>
-// }
-
-// https://github.com/alexbosworth/ln-service#subscribetoinvoice
-
-const {subscribeToInvoice} = require('ln-service');
-
-const {once} = require('events');
-
-async function subToInvoice(id) {
-    console.log(`Waiting for Payment...`);
-    try {
-        const sub = subscribeToInvoice({ id: id, lnd: lnd });
-        const [invoice] = await once(sub, 'invoice_updated');
-        console.log(`invoice: ${JSON.stringify(invoice, null, 2)}`);
-    } catch (err) {
-        console.error(`Error creating invoice info: ${err.message}`)
-    }
-}
-
-var myEventHandler = function (invoice) {
-    console.log(`invoice: ${JSON.stringify(invoice, null, 2)}`);
-}
-
-const {on} = require('events');
-
-async function waitForPayment(id) {
-    console.log(`Waiting for payment for invoice ${id}...`);
-    try {
-        const sub = subscribeToInvoice({ id: id, lnd: lnd });
-        // on(sub, 'invoice_updated', myEventHandler);
-        sub.on('invoice_updated', myEventHandler);
-        console.log(`Registered on handler for invoice ${id}...`);
-        // console.log(`invoice: ${JSON.stringify(invoice, null, 2)}`);
-    } catch (err) {
-        console.error(`Error waiting on invoice payment: ${err.message}`)
-    }
-}
-
-async function getNewInvoiceInfo(inv) {
-    console.log(`Creating New Invoice...`);
-    try {
-        const invoice = await createInvoice(inv);
-        console.log(`invoice: ${JSON.stringify(invoice, null, 2)}`);
-        // subToInvoice(invoice.id);
-        waitForPayment(invoice.id);
-    } catch (err) {
-        console.error(`Error creating invoice info: ${err.message}`)
-    }
-}
+const ln = require('./libln');
 
 console.log('Getting node info...');
-getNodeInfo();
-// getNewInvoiceInfo({lnd: lnd, tokens: 19, description: "test invoice 19"});
+ln.getNodeInfo();
 
-// let inv = getInvoiceInfo("3b4d9b2dc0a1ed3456b2fceab3c6b07e76d2e3d09166be617a2820b4ac3ddde5");
-// console.log(`invoice: ${JSON.stringify(inv.request, null, 2)}`);
-  
+ln.subToInvoices();
+
+console.log("Reconnect any websocket browser windows...");
+
+async function someFunction(inv) {
+    const someInvoice = await getNewInvoiceInfo(inv);
+    console.log(`someInvoice: ${JSON.stringify(someInvoice, null, 2)}`);
+    return someInvoice;
+}
+
 // Run tests via "npm --type=TYPE test" (types available: memory (default), redis are available)
 var TYPE = process.env['npm_config_type'] || 'memory';
 
@@ -244,6 +207,7 @@ app.use(oauth20.inject());
 global.gtid = 'aef487d1-0879-4fb1-a8f4-2384b71226c2';  // zone i.e. tenant ID of cryptorates subaccount
 
 const axios = require('axios');
+const { exit } = require('process');
 
 app.all("*", function (req, res, next) {
 
@@ -399,9 +363,10 @@ var router = require("./router")(app, server);
 const wsServer = new ws.Server({ noServer: true });
 
 var client_cnt = 0;
+gsocket = {};
 
 wsServer.on('connection', (socket, req) => {
-
+    gsocket = socket;
     console.log('New Client Joining...');
     const searchParams = new URLSearchParams(req.url);
     console.log(searchParams.getAll("tenantid"));
@@ -496,31 +461,26 @@ wsServer.on('connection', (socket, req) => {
     // ---
 
     // Enable to peridically send an invoice for testing
+    // +++
     // var intervalInvoice = setInterval(myInvoice, 10000);
 
-    function myInvoice() {
-        getInvoice(deviceId).then((inv)=>{
-        socket.send(JSON.stringify({
-        "type": "invoice",
-        "invoice": inv
-        }))
+    function myInvoice(invReq) {
 
-    })
+        // promiseInvoice(deviceId).then((inv)=>{
+        // socket.send(JSON.stringify({
+        // "type": "invoice",
+        // "invoice": inv
+        // }))
+        // })
+
+        someFunction({lnd: lnd, tokens: 19, description: "next invoice 19"}).then((inv)=>{
+            socket.send(JSON.stringify({
+                "type": "invoice",
+                "invoice": inv.request
+                }))
+            })
     }
-
-    
-    function getInvoice(d) {
-        console.log('getInvoice...');
-        return new Promise((resolve, reject) => {
-            console.log('In Promise...');
-            ////let inv = getInvoiceInfo("3b4d9b2dc0a1ed3456b2fceab3c6b07e76d2e3d09166be617a2820b4ac3ddde5");
-            // let t = inv.request;
-            let t = "lnbc190n1pjgy36fpp5dglatu3prge5qxnyuhgrxx0mflmm0x82yh3y2hd4e0lsfhvm7ldqdqcw3jhxapqd9h8vmmfvdjjqvfecqzzsxqr23ssp5pn27g6zvkjzpzpkj2x067wfcmghp0wuw4f3h088ljgh5kd5gnu3s9qyyssq2tk37wk2fry5gdjn9e6zd4e684sgfc8qryg0434w9xzhxdwkn32xc65xj7gpjcsjkpaneljwqxcxt85rm29rg5vxa4zlmk6fj82f3zgq0gqezp";
-            resolve(t);
-            console.log('End Promise...');
-        })
-    }
-
+   
     
     socket.on('close', function close() {
         console.log('Disconnected...');
@@ -537,6 +497,33 @@ wsServer.on('error', error => {
     console.log('Server Error...' + error);
 });
 
+function promiseInvoice(invReq) {
+    console.log('promiseInvoice...');
+    return new Promise((resolve, reject) => {
+        console.log('In Promise...');
+        ////let inv = getInvoiceInfo("3b4d9b2dc0a1ed3456b2fceab3c6b07e76d2e3d09166be617a2820b4ac3ddde5");
+        let t = invReq;
+        // let t = "lnbc190n1pjgy36fpp5dglatu3prge5qxnyuhgrxx0mflmm0x82yh3y2hd4e0lsfhvm7ldqdqcw3jhxapqd9h8vmmfvdjjqvfecqzzsxqr23ssp5pn27g6zvkjzpzpkj2x067wfcmghp0wuw4f3h088ljgh5kd5gnu3s9qyyssq2tk37wk2fry5gdjn9e6zd4e684sgfc8qryg0434w9xzhxdwkn32xc65xj7gpjcsjkpaneljwqxcxt85rm29rg5vxa4zlmk6fj82f3zgq0gqezp";
+        resolve(t);
+        console.log('End Promise...');
+    })
+}
+
+function sendInvoice(invReq) {
+
+    if ((typeof gsocket == "object") && (typeof gsocket.send == "function")) {
+        promiseInvoice(invReq).then((inv)=>{
+            gsocket.send(JSON.stringify({
+                "type": "invoice",
+                "invoice": inv
+            }))
+        })
+    } else {
+        console.log('No websockets listening...be sure to have a rates/chat open and connected.');
+    }
+
+}
+
 function broadcast(data) {
 
     var idx = 1;
@@ -551,7 +538,7 @@ function broadcast(data) {
     });
 }
 
-function notify_tenant(tenantid,data) {
+global.notify_tenant = function(tenantid,data) {
 
     var idx = 1;
     wsServer.clients.forEach(client => {

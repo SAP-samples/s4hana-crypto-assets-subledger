@@ -255,6 +255,7 @@ module.exports = () => {
 	TYPE = "sqlite";
 	
 	var oauth20     = require('./../../oauth20.js')(TYPE);
+	const srv = require('../../server');
 
 	const sleep = (waitTimeInMs) => new Promise(resolve => setTimeout(resolve, waitTimeInMs));
 
@@ -269,46 +270,53 @@ module.exports = () => {
 			// Check if the tenant_id exists.  
 			var tenant = db.getTenantByID(tenantID);
 			var quoteCost = 1000;	// Estimate of quote cost in satoshis
-
+			var httpTimeoutMSecs = (29 * 1000); 
+			const httpTimeoutStart = new Date();
 			// Simulate a delay in generating the response
 			// const simsecs = 30	// Usually times out
 			// const simsecs = 29	// Just under normal browser timeout
-			const simsecs = 1	// A reasonable round trip time. Overhead is about 0.45 seconds
-			console.log("Waiting " + simsecs + " seconds.");
-			await sleep(simsecs * 1000); // sleep for simsecs seconds
-			res.setHeader('Server-Timing', 'delay;dur=' + (simsecs * 1000) + ', ' + 'app;dur=' + '1984' + ', ' + 'other;dur=' + '101');
-			console.log(simsecs + " seconds later.");
+
+			// const simsecs = 3	// A reasonable round trip time. Overhead is about 0.45 seconds
+			// console.log("Waiting " + simsecs + " seconds.");
+			// await sleep(simsecs * 1000); // sleep for simsecs seconds
+			// res.setHeader('Server-Timing', 'delay;dur=' + (simsecs * 1000) + ', ' + 'app;dur=' + '1984' + ', ' + 'other;dur=' + '101');
+			// console.log(simsecs + " seconds later.");
 
 			if ((tenant) && (typeof tenant == "object")) {
+
+				var serverTiming = "";
 
 				// Make an estimate of what the crypto rate request will cost
 				// quoteCost = getQuoteCost(req.body);
 				const startdate = new Date()
 				
-				const nodeinfo = await ln.getNodeInfo();
-				console.log(`ln: ${JSON.stringify(nodeinfo.alias, null, 2)}`);
+				// const nodeinfo = await ln.getNodeInfo();
+				// console.log(`ln: ${JSON.stringify(nodeinfo.alias, null, 2)}`);
 
-				const enddate = new Date()
+				const enddate = new Date();
 				const duration = enddate - startdate;
+
+				serverTiming += 'ln;dur=' + duration;
 
 				const quote = await exchange.getQuote("EUR~USD");
 				console.log(`quote: ${JSON.stringify(quote, null, 2)}`);
 				
-				const enddate2 = new Date()
+				const enddate2 = new Date();
 				const duration2 = enddate2 - enddate;
 
-				res.setHeader('Server-Timing', 'ln;dur=' + duration + ', ' + 'ex;dur=' + duration2);
+				serverTiming += ', ' + 'ex;dur=' + duration2;
 
-				tenant.satoshi = quote;
+
+				// tenant.satoshi = quote;
 
 				// What plan are they on?  Free, Monthly?
 				if (tenant.plan == "F") {
-					// Need to decide if we want to fetch first and invoice after or invoice first
+					// Need to fetch first and invoice after
 					// Check if they have any satoshi credits
-					if (tenant.satoshi >= quoteCost) {
+					if (false) {
 						// Deduct from the tenant's satoshi total
-						// Fetch the results
 						// Return the results
+						tenant.satoshi = quote;
 						return res.status(200).json(tenant);
 					} else {
 						// Check if they have a lightning wallet registered
@@ -319,16 +327,73 @@ module.exports = () => {
 							// Check to see if this tenant has an established socket connection
 
 							if (true) {
-								// Fetch the results
-								// Make the request to the Crypto backend(s)
+								// Calculate the invoice cost
+								// Create the invoice
 
-								// Cause the invoice to be sent to the browser
+								const newInvoice = await ln.getNewInvoiceInfo({lnd: lnd, tokens: 19, description: "next invoice 19"});
+								console.log(`newInvoice: ${JSON.stringify(newInvoice, null, 2)}`);
 
+								const deletedPayments = ln.delPendingPayments(tenantID);
+								console.log(`deletedPayments: ${JSON.stringify(deletedPayments, null, 2)}`);
+
+								const addedPayment = ln.addPendingPayment(tenantID,newInvoice.id);
+								console.log(`addedPayment: ${JSON.stringify(addedPayment, null, 2)}`);
+
+								const enddate3 = new Date()
+								const duration3 = enddate3 - enddate2;
+								serverTiming += ', ' + 'in;dur=' + duration3;
+								
+								const httpTimeoutEnd = new Date();
+								const mSecsLeftToWaitForPayment = httpTimeoutMSecs - (httpTimeoutEnd - httpTimeoutStart);
+								console.log("mSecsLeftToWaitForPayment: " + mSecsLeftToWaitForPayment);
+
+								// Need to figure out how to block and wait
 								// Wait for payment confirmation
 
-								// When paid, return the quotes
-								// Return the results
-								return res.status(200).json(tenant);
+								// Cause the invoice to be sent to the browser
+								var pending = false;
+								const waitInterval = 1000;
+								var secsLeftToWait = Math.floor(mSecsLeftToWaitForPayment / waitInterval);
+								console.log("secsLeftToWait: " + secsLeftToWait);
+
+								console.log("\n\n" + "Pay this invoice quickly:\n\n");
+								console.log(newInvoice.request);
+								console.log("\n\n");
+								srv.sendInvoice(newInvoice.request);
+
+								process.stdout.write("sleep: ");
+
+								for (var i=0; i<secsLeftToWait; i++) {
+									pending = ln.isPaymentPending(tenantID,newInvoice.id);
+									if (!pending) {
+										break;
+									}
+
+									// process.stdout.write("\b" + (secsLeftToWait - i));
+									console.log("Secs to timeout: " + (secsLeftToWait - i));
+									await sleep(waitInterval); // sleep for a second
+								}
+
+								console.log("\n");
+
+								const enddate4 = new Date()
+								const duration4 = enddate4 - enddate3;
+								serverTiming += ', ' + 'py;dur=' + duration4;
+								
+								if (pending) {	// i.e. timed out while still pending
+									console.log("...timed out");
+									// When paid, return the quotes
+									tenant.satoshi = 0;
+									// Return the results
+									res.setHeader('Server-Timing', serverTiming);
+									return res.status(408).send("timed out");
+								} else {
+									// When paid, return the quotes
+									tenant.satoshi = quote;
+									// Return the results
+									res.setHeader('Server-Timing', serverTiming);
+									return res.status(200).json(tenant);
+								}
 							} else {
 								console.log("Problem: " + "Lightning payment require a connected Lightning wallet.");
 								return res.status(403).send('Forbidden');

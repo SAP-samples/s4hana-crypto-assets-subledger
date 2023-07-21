@@ -17,3 +17,4 @@ _out
 .che/
 .gen/
 .DS_Store
+package-lock.json

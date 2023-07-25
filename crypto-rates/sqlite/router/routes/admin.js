@@ -148,14 +148,14 @@ module.exports = () => {
 
 	app.get("/db_list", async function (req, res) {
 
-		const rows = db.prepare(`SELECT id, tenant, timeStamp FROM tenantInfo`).all();
+		const rows = db.preparer(`SELECT id, tenant, created FROM tenantInfo`).all();
 		// const rows = db_prepare(`SELECT id, tenant, timeStamp FROM tenantInfo`).all();
 
 		var items = [];
 
 		rows.forEach(row => {
 			console.log(row);
-			var item = {id: row.id, name: row.tenant, time: row.timeStamp};
+			var item = {id: row.id, name: row.tenant, time: row.created};
 			items.push(item);
 		});
 

@@ -13,3 +13,5 @@ export LND_GRPC_HOST=$(cat ~/.bos/ragnar/credentials.json | jq -r '.socket')
 # export LND_GRPC_HOST=$(cat ~/.bos/umbrelpi/credentials.json | jq -r '.socket')
 
 echo "test with 'echo \$LND_GRPC_HOST'"
+
+nvm use v18.5.0

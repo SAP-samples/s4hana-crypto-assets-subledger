@@ -55,7 +55,7 @@
     <body style="font-family: Tahoma, Geneva, sans-serif" onload="existsWebLN();">
     <h1>{{ title}}</h1><br />
 
-    <div id="prereqs">
+    <div id="prereqs" style="disply:none">
         <h3>Prerequisites</h3>
         <p>
             This Sign Up procedure requires that a Lightning Node Provider be installed. <br />
@@ -71,6 +71,9 @@
         <tr><td align="right">Nickname:</td><td><input type="text" id="nick" name="nick" minlength="4" maxlength="20" size="20"  style="font-family: monospace;" placeholder="enter a nickname"onKeyDown="nickbutton()"> Doesn't have to be a real name.</td><td><button id="getnick" onclick="doCheckNick()">Check Availability</button></td></tr>
         <!-- aef487d1-0879-4fb1-a8f4-2384b71226c2 -->
         <tr><td align="right">Tenant ID:</td><td><input type="text" id="tenantid" name="tenantid" size="51" style="font-family: monospace;" placeholder="On BTP, TenantID is found on Subaccount Overview">&nbsp;<button id="gentrialid" align="right" onclick="genTrialID()">Generate Trial ID</button></td><td><button id="register" disabled onclick="doRegister()">Register</button></td></tr>
+        <tr id="secretrows1" style="display:none"><td align="right">Client ID:</td><td><input type="text" id="clientid" name="clientid" size="51" style="font-family: monospace;" placeholder="Client ID">&nbsp;</td><td>&nbsp;</td></tr>
+        <tr id="secretrows2" style="display:none"><td align="right">Client Secret:</td><td><input type="text" id="clientsecret" name="clientsecret" size="51" style="font-family: monospace;" placeholder="Client Secret">&nbsp;</td><td>&nbsp;</td></tr>
+        <tr id="secretrows3" style="display:none"><td align="right">Payment Chat:</td><td><a href="/rates/chat?tenantid=" id="paymentchat" target="paymentchat">/rates/chat?tenantid=</a></td><td>&nbsp;</td></tr>
         </table>
         <textarea rows="1" cols="72" id="message"></textarea>
         <button type="submit" id="send">Return Key to Send</button>
@@ -245,6 +248,17 @@
                     } else {
                         if (response.status == "registered") {
                             document.getElementById("register").innerHTML = "Registered";
+                            
+                            document.getElementById("clientid").value = response.credentials.uaa.clientid;
+                            document.getElementById("clientsecret").value = response.credentials.uaa.clientsecret;
+                            document.getElementById("paymentchat").href = "/rates/chat?tenantid=" + response.credentials.uaa.clientid;
+                            document.getElementById("paymentchat").innerHTML = "/rates/chat?tenantid=" + response.credentials.uaa.clientid;
+
+
+                            document.getElementById("secretrows1").style.display = '';
+                            document.getElementById("secretrows2").style.display = '';
+                            document.getElementById("secretrows3").style.display = '';
+
                             doLog(JSON.stringify(response,null,2));
                         } else {
                             document.getElementById("register").innerHTML = "KaPut";

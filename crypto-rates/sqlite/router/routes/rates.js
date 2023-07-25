@@ -333,12 +333,16 @@ module.exports = () => {
 								const newInvoice = await ln.getNewInvoiceInfo({lnd: lnd, tokens: 19, description: "next invoice 19"});
 								console.log(`newInvoice: ${JSON.stringify(newInvoice, null, 2)}`);
 
-								const deletedPayments = ln.delPendingPayments(tenantID);
-								console.log(`deletedPayments: ${JSON.stringify(deletedPayments, null, 2)}`);
+								if (typeof newInvoice == "object") {
+									const deletedPayments = ln.delPendingPayments(tenantID);
+									console.log(`deletedPayments: ${JSON.stringify(deletedPayments, null, 2)}`);
 
-								const addedPayment = ln.addPendingPayment(tenantID,newInvoice.id);
-								console.log(`addedPayment: ${JSON.stringify(addedPayment, null, 2)}`);
+									const addedPayment = ln.addPendingPayment(tenantID,newInvoice.id);
+									console.log(`addedPayment: ${JSON.stringify(addedPayment, null, 2)}`);
 
+								} else {
+									console.log("Unable to create a new invoice.  Is LND available?");
+								}
 								const enddate3 = new Date()
 								const duration3 = enddate3 - enddate2;
 								serverTiming += ', ' + 'in;dur=' + duration3;
@@ -507,6 +511,16 @@ module.exports = () => {
 			} else {
 				res.status(200).json({"result": false});
 			}
+		} else {
+			res.status(200).json({"status": "unexpected body"});
+		}
+	});
+
+	app.post('/getNickFromPubKey', function (req, res) {
+		
+		if (((typeof req) == "object") && ((typeof req.body) == "object")) {
+			const resobj = db.get_nick_from_pubkey(req.body.pubkey);
+			res.status(200).json({"result": true, "nick": resobj.nick, "tenant": resobj.tenant});
 		} else {
 			res.status(200).json({"status": "unexpected body"});
 		}

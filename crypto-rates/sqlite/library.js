@@ -4,6 +4,7 @@ module.exports = {
     prepare: prepare,
 	preparer: preparer,
 	check_nick_exists: check_nick_exists,
+	get_nick_from_pubkey: get_nick_from_pubkey,
     tenant_register: tenant_register,
     tenant_unregister: tenant_unregister,
     list_all: admin_list_all,
@@ -228,6 +229,14 @@ function drop() {
     info = stmt.run();
     console.log(info.changes);
 
+    stmt = db.prepare('DROP TABLE IF EXISTS pending_payments');
+    info = stmt.run();
+    console.log(info.changes);
+
+    // stmt = db.prepare('DROP TABLE IF EXISTS socket_connections');
+    // info = stmt.run();
+    // console.log(info.changes);
+
 }
 
 // gtid = global tenant Id is set within the * handler in server.js approx Line 101 which is fortuitous for 1984 fans.
@@ -316,6 +325,26 @@ function check_nick_exists(nick) {
 	return found;
 }
 
+function get_nick_from_pubkey(pubkey) {
+    console.log("get_nick_from_pubkey: " + pubkey);
+
+
+	const rows = db.prepare(`SELECT nick,tenant FROM tenantInfo WHERE pubkey = '` + pubkey + `'`).all();
+
+	var lastnick = "unregistered";
+	var lasttenant = "unknown";
+
+	rows.forEach(row => {
+		// console.log(row);
+		lastnick = row.nick;
+		lasttenant = row.tenant;
+	});
+
+    //db.close();
+	console.log(lastnick);
+	return({"nick": lastnick, "tenant": lasttenant});
+}
+
 
 function fetchById(clientid) {
     console.log("fetchById: " + clientid);
@@ -332,7 +361,8 @@ function fetchByToken(token) {
 
 	const access_token = db.prepare(`SELECT token,userId,clientId,scope,ttl FROM access_token WHERE token = ?`).get(token);
 
-	access_token.scope = JSON.parse(access_token.scope);
+	// Scope isn't valid JSON at times for some reason.  Skip for now
+	// access_token.scope = JSON.parse(access_token.scope);
 
 	if ((access_token) && (typeof access_token == "object")) {
 		return access_token;
@@ -349,8 +379,10 @@ function checkSecret(client, secret) {
 	console.log("tenant: " + JSON.stringify(tenant,null,2));
 
 	if ((tenant) && (typeof tenant == "object") && (typeof tenant.clientsecret == "string") && (tenant.clientsecret == secret)) {
+		console.log("Secret Matches " + secret);
 		return true;
 	} else {
+		console.log("Secret DOES NOT Match " + secret);
 		return false;
 	}
 }

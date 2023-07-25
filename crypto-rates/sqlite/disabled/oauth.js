@@ -11,6 +11,8 @@ const util = require('util');
 // Run tests via "npm --type=TYPE test" (types available: memory (default), sqlite are available)
 var TYPE = process.env['npm_config_type'] || 'memory';
 
+TYPE = "sqlite";
+
 var query           = require('querystring');
 var cookieParser    = require('cookie-parser');
 var session         = require('express-session');

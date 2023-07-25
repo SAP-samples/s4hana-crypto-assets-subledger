@@ -177,6 +177,8 @@ async function someFunction(inv) {
 // Run tests via "npm --type=TYPE test" (types available: memory (default), redis are available)
 var TYPE = process.env['npm_config_type'] || 'memory';
 
+TYPE = "sqlite";
+
 var query           = require('querystring');
 var cookieParser    = require('cookie-parser');
 var bodyParser      = require('body-parser');

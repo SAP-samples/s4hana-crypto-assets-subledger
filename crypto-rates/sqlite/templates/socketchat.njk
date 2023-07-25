@@ -39,11 +39,106 @@
             window.onload = onWindowLoad;
         }
     }());			
+
+    function doGetNick()
+    {
+
+        var pathAndParams = '{{base}}/getNickFromPubKey';
+
+        xhr = new XMLHttpRequest();
+        xhr.open('POST', pathAndParams);
+
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader("Accept", "application/json");
+
+        var request_obj = { 
+            "pubkey": document.getElementById("pubkey").value
+        };
+
+        xhr.onload = function() {
+            
+            if (xhr.status == 200) {
+
+                var isJsonBody = false;
+                var headers = xhr.getAllResponseHeaders();
+                const hdrs = headers.split('\r\n');
+                hdrs.forEach(function(hdr){
+                    var parts = hdr.split(':');
+                    if (parts[0] == "content-type") {
+                        var bits = parts[1].split(';');
+                        if (bits[0].trim() == "application/json") {
+                            isJsonBody = true;
+                        }
+                    }
+                });
+
+                if (isJsonBody) {
+                    var response = JSON.parse(xhr.responseText);
+                    console.log(response);
+                    document.getElementById("nick").value = response.nick;
+                    if (window.location.href.search("tenantid") < 0) {
+                        window.location.href = window.location.href + "?tenantid=" + response.tenant;
+                    }
+                }
+            } 
+            else {
+                document.getElementById("nick").innerHTML = "Unexpected";
+            }
+        };
+
+        xhr.send(JSON.stringify(request_obj));
+
+    }
+
+    async function asyncGetPubKey(req, res) {
+        try {
+            const webln = await WebLN.requestProvider();
+            const info = await webln.getInfo();
+            document.getElementById("pubkey").value = info.node.pubkey;
+            document.getElementById("nick").value = info.node.alias;
+            doGetNick();
+        }
+        catch(err) {
+            // Tell the user what went wrong
+            console.log(err.message);
+            alert(err.message);
+        }
+    };
+
+    function existsWebLN() {
+        if (((typeof window.webln) == "object") && ((typeof window.webln.enabled) == "boolean")) {
+            document.getElementById("prerequisits").style.display = "none";
+            document.getElementById("mainsection").style.display = "block";
+            asyncGetPubKey(null, null);
+        }
+        else {
+            document.getElementById("prerequisits").style.display = "block";
+            document.getElementById("mainsection").style.display = "none";
+        }
+    };
     </script>
 
     </head>
-    <body style="font-family: Tahoma, Geneva, sans-serif">
-    
+    <body style="font-family: Tahoma, Geneva, sans-serif" onload="existsWebLN();">
+
+    <script>
+
+    // document.getElementById("prerequisits").style.display = "none";
+    // document.getElementById("mainsection").style.display = "none";
+
+    </script>
+
+    <div id="prerequisits">
+        <h3>Prerequisites</h3>
+        <p>
+            This chat page requires that a Lightning Node Provider be installed. <br />
+            The <a href="https://getalby.com/" target="get_ext">Alby Browser Extension</a> is recommended. <br />
+            Install an extension and reload this page. <br />
+        </p>
+    </div>
+
+    <div id="mainsection">
+
     <div id="tokendiv" style="display: none;" >
     <table border="0" cellspacing="1" cellpadding="2">
     <tr><th align="right">Name</th><th>Description</th></tr>
@@ -54,7 +149,7 @@
 
     <!-- <button id="onboard">Loading...</button> <div id="chainlist" style="display: inline">Add a Theta network to your MetaMask with <a href="https://chainlist.org/?search=theta" target="chainlist">ChainList</a></div><br /> -->
     <!-- <textarea rows="1" cols="80" id="nick"></textarea> -->
-    Nickname: <input type="text" id="nick" size="4" style="font-family: monospace" onInput="showCurrentValue(event)" /> Address: <input type="text" id="addr" size="42" style="font-family: monospace" />
+    Nickname: <input type="text" id="nick" size="14" style="font-family: monospace" onInput="showCurrentValue(event)" /> PubKey: <input type="text" id="pubkey" size="42" style="font-family: monospace" />
     <!-- <input cols="80" id="nick"></input> -->
     <form id="chatform">
         <textarea rows="1" cols="72" id="message"></textarea>
@@ -81,6 +176,8 @@
     <button id="test06" onclick="testLN06()">Test 06 : VerifyMessage</button>
 
     <ul id="chat"></ul>
+
+    </div>
 
     <script src="main.js?tenantid={{tenantid}}"></script>
     <script src="common.js"></script>
@@ -137,6 +234,8 @@
     <!-- <script>updateButton();</script> -->
 
     <ul id="webln">Nothing Yet!</ul>
+
+
 
     </body>
 </html>

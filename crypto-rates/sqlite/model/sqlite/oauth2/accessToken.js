@@ -16,6 +16,8 @@ module.exports.create = function(userId, clientId, scope, ttl, cb) {
     console.log("userId: " + userId);
     console.log("clientId: " + clientId);
     console.log("scope: " + JSON.stringify(scope));
+    // var hackedscope = scope;
+    // hackedscope = "uaa.resource market-data-MRM-MRM_BYOD!b1736.JOBSCHEDULER market-data-MRM-MRM_BYOD!b1736.PROVISIONING market-data-MRM-MRM_BYOD!b1736.SCOPE1 market-data-MRM-MRM_BYOD!b1736.initdb market-data-MRM-MRM_BYOD!b1736.MSCOPE market-data-MRM-MRM_BYOD!b1736.marketdata";
     console.log("ttl: " + ttl);
     var obj = {token: token, userId: userId, clientId: clientId, scope: scope, ttl: ttl};
     // console.log("create: " + JSON.stringify(obj));

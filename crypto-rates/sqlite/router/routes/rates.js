@@ -206,7 +206,7 @@ module.exports = () => {
 	});
 
 	
-	app.get("/downloadCryptoData", function (req, res) {
+	app.get("/downloadCryptoDataJSON", function (req, res) {
 
         var headers = [
             {
@@ -241,10 +241,119 @@ module.exports = () => {
 			title: "Download API Test JSON",
 			base: base_path,
             path: "downloadCryptoData",
-            docs: "https://help.sap.com/docs/SAP_CP_BUS_REUSE_SERVICE_MRM_APP/64e0eccf2d424543be76606dd5e5e460/41ac38839ac44f90957a4e53e88ae860.html?q=market%20data",
+            // docs: "https://help.sap.com/docs/SAP_CP_BUS_REUSE_SERVICE_MRM_APP/64e0eccf2d424543be76606dd5e5e460/41ac38839ac44f90957a4e53e88ae860.html?q=market%20data",
+            docs: "/rates/downloadCryptoData",
 			params: "async=false",
             headers: headers,
 			body: JSON.stringify(body, null, 2),
+            expected_status: 200
+		}));
+
+	});
+	
+	app.get("/downloadCryptoData", function (req, res) {
+
+        var headers = [
+            {
+                name: "Content-Type",
+                value: "text/plain"
+            },
+            {
+                name: "Accept",
+                value: "text/plain"
+            }
+        ];
+
+		var body = "";
+
+		// body += '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 //EN">\n';                                
+		// body += '<html>\n'; 
+		// body += '<head>\n'; 
+		// body += '<title>SAP Market Data Datafeed Interface Version 1.0</title>\n';
+		// body += '<meta name="SAP_Internet_Market_Data_Request_Format_Version" content="text/html 1.0">\n';
+		// body += '</head>\n';
+		// body += '<body>\n';
+		// body += 'EUR~USD:01          ECB            C              0000000000000000000000000000			\n';
+		// body += '</body>\n';
+		// body += '</html>\n';
+
+		body += '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 //EN">\n';
+		body += '<html>\n';
+		body += '<head>\n';
+		body += '<title>SAP Market Data Datafeed Interface Version 1.0</title>\n';
+		body += '<meta name="SAP_Internet_Market_Data_Request_Format_Version" content="text/html 1.0">\n';
+		body += '<meta name="TableRow1" content="RINID1    Instrument Name">\n';
+		body += '<meta name="TableRow1_Length" content="20">\n';
+		body += '<meta name="TableRow2" content="RINID2    Data Source">\n';
+		body += '<meta name="TableRow2_Length" content="15">\n';
+		body += '<meta name="TableRow3" content="SPRPTY    Instrument Property">\n';
+		body += '<meta name="TableRow3_Length" content="15">\n';
+		body += '<meta name="TableRow4" content="DFROMDATE Historical Data Start Date">\n';
+		body += '<meta name="TableRow4_Length" content="8">\n';
+		body += '<meta name="TableRow5" content="DFROMTIME Historical Data Start Time">\n';
+		body += '<meta name="TableRow5_Length" content="6">\n';
+		body += '<meta name="TableRow6" content="DTODATE Historical Data End Date">\n';
+		body += '<meta name="TableRow6_Length" content="8">\n';
+		body += '<meta name="TableRow7" content="DTOTIME Historical Data End Time">\n';
+		body += '<meta name="TableRow7_Length" content="6">\n';
+		body += '<meta name="TableRow8" content="UNAME     SAP User Requesting">\n';
+		// body += '<meta name="TableRow8_Length" content="12">\n';
+		// body += '<meta name="SAP_Internet_Market_Data_Answer_Format_Version" content="text/plain 1.0">\n';
+		// body += '<meta name="TableRow1" content="RINID1    Instrument Name">\n';
+		// body += '<meta name="TableRow1_Length" content="20">\n';
+		// body += '<meta name="TableRow2" content="RINID2    Data Source">\n';
+		// body += '<meta name="TableRow2_Length" content="15">\n';
+		// body += '<meta name="TableRow3" content="SPRPTY    Instrument Property">\n';
+		// body += '<meta name="TableRow3_Length" content="15">\n';
+		// body += '<meta name="TableRow4" content="SSTATS Request Status: Blanks, if ok ">\n';
+		// body += '<meta name="TableRow4_Length" content="2">\n';
+		// body += '<meta name="TableRow5" content="ERROR Error Message relating to STATUS ">\n';
+		// body += '<meta name="TableRow5_Length" content="80">\n';
+		// body += '<meta name="TableRow6" content="RSUPID Data source">\n';
+		// body += '<meta name="TableRow6_Length" content="10">\n';
+		// body += '<meta name="TableRow7" content="RCONID Contributor Identification">\n';
+		// body += '<meta name="TableRow7_Length" content="10">\n';
+		// body += '<meta name="TableRow8" content="RCONCN Contributor Country Identification">\n';
+		// body += '<meta name="TableRow8_Length" content="5">\n';
+		// body += '<meta name="TableRow9" content="DATE Date in YYYYMMDD Format">\n';
+		// body += '<meta name="TableRow9_Length" content="8">\n';
+		// body += '<meta name="TableRow10" content="TIME Time in HHMMSS Format">\n';
+		// body += '<meta name="TableRow10_Length" content="6">\n';
+		// body += '<meta name="TableRow11" content="VALUE Value with decimal point optionally">\n';
+		// body += '<meta name="TableRow11_Length" content="20">\n';
+		// body += '<meta name="TableRow12" content="CURRENCY Currency Information for security prices">\n';
+		// body += '<meta name="TableRow12_Length" content="5">\n';
+		// body += '<meta name="TableRow13" content="MKIND Market Indicator for security prices">\n';
+		// body += '<meta name="TableRow13_Length" content="5">\n';
+		// body += '<meta name="TableRow14" content="CFFACT Currency: From factor">\n';
+		// body += '<meta name="TableRow14_Length" content="7">\n';
+		// body += '<meta name="TableRow15" content="CTFACT Currency: To factor">\n';
+		// body += '<meta name="TableRow15_Length" content="7">\n';
+		// body += '<meta name="TableRow16" content="UNAME Currency: User Name">\n';
+		// body += '<meta name="TableRow16_Length" content="12">\n';
+		// body += '<meta name="TableRow17" content="RZUSATZ Volatilities: Number of Days">\n';
+		// body += '<meta name="TableRow17_Length" content="10">\n';
+		body += '<meta name="TableRow18" content="NEWLINE Line Feed Character/Newline">\n';
+		body += '<meta name="TableRow18_Length" content="1">\n';
+		body += '</head>\n';
+		body += '<body>\n';
+		body += 'EUR~USD:01          ST             CLOSE          0000000000000000000000000000ALUNDE\n';
+		body += '</body>\n';
+		body += '</html>\n';
+
+		// https://launchpad.support.sap.com/#/notes/2431370
+		// https://help.sap.com/docs/SAP_S4HANA_CLOUD/e5ec5859d8e54df98492d80564a734c0/3c513ff5d5f1468d81dd84a7743256a2.html?locale=en-US
+		// https://help.sap.com/docs/SAP_CP_BUS_REUSE_SERVICE_MRM_APP/64e0eccf2d424543be76606dd5e5e460/41ac38839ac44f90957a4e53e88ae860.html?q=market%20data
+
+		res.send(nunjucks.render('templates/apitestbody.njk', { 
+			title: "Download API Test JSON",
+			base: base_path,
+            path: "downloadCryptoData",
+			// docs: "https://help.sap.com/docs/SAP_CP_BUS_REUSE_SERVICE_MRM_APP/64e0eccf2d424543be76606dd5e5e460/41ac38839ac44f90957a4e53e88ae860.html?q=market%20data",
+            docs: "/rates/downloadCryptoDataJSON",
+			params: "async=false",
+            headers: headers,
+			body: body,
             expected_status: 200
 		}));
 
@@ -281,6 +390,12 @@ module.exports = () => {
 			// await sleep(simsecs * 1000); // sleep for simsecs seconds
 			// res.setHeader('Server-Timing', 'delay;dur=' + (simsecs * 1000) + ', ' + 'app;dur=' + '1984' + ', ' + 'other;dur=' + '101');
 			// console.log(simsecs + " seconds later.");
+
+			const contentTypeHdr = req.headers["content-type"];
+
+			const contentTypeParts = contentTypeHdr.split(";")
+			
+			const contentType = contentTypeParts[0].trim();
 
 			if ((tenant) && (typeof tenant == "object")) {
 
@@ -327,62 +442,68 @@ module.exports = () => {
 							// Check to see if this tenant has an established socket connection
 
 							if (true) {
-								// Calculate the invoice cost
-								// Create the invoice
-
-								const newInvoice = await ln.getNewInvoiceInfo({lnd: lnd, tokens: 19, description: "next invoice 19"});
-								console.log(`newInvoice: ${JSON.stringify(newInvoice, null, 2)}`);
-
-								if (typeof newInvoice == "object") {
-									const deletedPayments = ln.delPendingPayments(tenantID);
-									console.log(`deletedPayments: ${JSON.stringify(deletedPayments, null, 2)}`);
-
-									const addedPayment = ln.addPendingPayment(tenantID,newInvoice.id);
-									console.log(`addedPayment: ${JSON.stringify(addedPayment, null, 2)}`);
-
-								} else {
-									console.log("Unable to create a new invoice.  Is LND available?");
-								}
-								const enddate3 = new Date()
-								const duration3 = enddate3 - enddate2;
-								serverTiming += ', ' + 'in;dur=' + duration3;
 								
-								const httpTimeoutEnd = new Date();
-								const mSecsLeftToWaitForPayment = httpTimeoutMSecs - (httpTimeoutEnd - httpTimeoutStart);
-								console.log("mSecsLeftToWaitForPayment: " + mSecsLeftToWaitForPayment);
-
-								// Need to figure out how to block and wait
-								// Wait for payment confirmation
-
-								// Cause the invoice to be sent to the browser
 								var pending = false;
-								const waitInterval = 1000;
-								var secsLeftToWait = Math.floor(mSecsLeftToWaitForPayment / waitInterval);
-								console.log("secsLeftToWait: " + secsLeftToWait);
 
-								console.log("\n\n" + "Pay this invoice quickly:\n\n");
-								console.log(newInvoice.request);
-								console.log("\n\n");
-								srv.sendInvoice(newInvoice.request);
+								if (false) {
+									// Calculate the invoice cost
 
-								process.stdout.write("sleep: ");
+									// Create the invoice
 
-								for (var i=0; i<secsLeftToWait; i++) {
-									pending = ln.isPaymentPending(tenantID,newInvoice.id);
-									if (!pending) {
-										break;
+									const newInvoice = await ln.getNewInvoiceInfo({lnd: lnd, tokens: 19, description: "next invoice 19"});
+									console.log(`newInvoice: ${JSON.stringify(newInvoice, null, 2)}`);
+
+									if (typeof newInvoice == "object") {
+										const deletedPayments = ln.delPendingPayments(tenantID);
+										console.log(`deletedPayments: ${JSON.stringify(deletedPayments, null, 2)}`);
+
+										const addedPayment = ln.addPendingPayment(tenantID,newInvoice.id);
+										console.log(`addedPayment: ${JSON.stringify(addedPayment, null, 2)}`);
+
+									} else {
+										console.log("Unable to create a new invoice.  Is LND available?");
+									}
+									const enddate3 = new Date()
+									const duration3 = enddate3 - enddate2;
+									serverTiming += ', ' + 'in;dur=' + duration3;
+									
+									const httpTimeoutEnd = new Date();
+									const mSecsLeftToWaitForPayment = httpTimeoutMSecs - (httpTimeoutEnd - httpTimeoutStart);
+									console.log("mSecsLeftToWaitForPayment: " + mSecsLeftToWaitForPayment);
+
+									// Need to figure out how to block and wait
+									// Wait for payment confirmation
+
+									// Cause the invoice to be sent to the browser
+									pending = false;
+									const waitInterval = 1000;
+									var secsLeftToWait = Math.floor(mSecsLeftToWaitForPayment / waitInterval);
+									console.log("secsLeftToWait: " + secsLeftToWait);
+
+									console.log("\n\n" + "Pay this invoice quickly:\n\n");
+									console.log(newInvoice.request);
+									console.log("\n\n");
+									srv.sendInvoice(newInvoice.request);
+
+									process.stdout.write("sleep: ");
+
+									for (var i=0; i<secsLeftToWait; i++) {
+										pending = ln.isPaymentPending(tenantID,newInvoice.id);
+										if (!pending) {
+											break;
+										}
+
+										// process.stdout.write("\b" + (secsLeftToWait - i));
+										console.log("Secs to timeout: " + (secsLeftToWait - i));
+										await sleep(waitInterval); // sleep for a second
 									}
 
-									// process.stdout.write("\b" + (secsLeftToWait - i));
-									console.log("Secs to timeout: " + (secsLeftToWait - i));
-									await sleep(waitInterval); // sleep for a second
+									console.log("\n");
+
+									const enddate4 = new Date()
+									const duration4 = enddate4 - enddate3;
+									serverTiming += ', ' + 'py;dur=' + duration4;
 								}
-
-								console.log("\n");
-
-								const enddate4 = new Date()
-								const duration4 = enddate4 - enddate3;
-								serverTiming += ', ' + 'py;dur=' + duration4;
 								
 								if (pending) {	// i.e. timed out while still pending
 									console.log("...timed out");
@@ -395,8 +516,37 @@ module.exports = () => {
 									// When paid, return the quotes
 									tenant.satoshi = quote;
 									// Return the results
+									var responseBody = "";
+
+									responseBody += 'EUR';
+									responseBody += '~';
+									responseBody += 'USD';
+									responseBody += ':';
+									responseBody += '01';
+									responseBody += '          ';
+									// responseBody += 'ECB            ';
+									// responseBody += 'ST             ';
+									responseBody += 'BINANCE        ';
+									responseBody += 'CLOSE                                                                                                                     ';
+									responseBody += '20180501';
+									responseBody += '0000001.2310000000';
+									responseBody += '                                                      ';
+console.log('EUR~USD:01          ECB            CLO                                                                                                                       201805010000001.2310000000                                                      ');
+console.log(responseBody);
 									res.setHeader('Server-Timing', serverTiming);
-									return res.status(200).json(tenant);
+									if (contentType == "application/json") {
+										console.log("Returning JSON: " + JSON.stringify(tenant,null, 2));
+										return res.status(200).json(tenant);
+									} else {
+										console.log("contentType: " + contentType);
+										if (contentType == "text/plain") {
+											console.log("Returning TEXT: " + responseBody);
+											return res.status(200).send(responseBody);
+										} else {
+											console.log("Returning 415 Unsupported Content-Type: " + contentType);
+											return res.status(415).send("Unsupported Content-Type: " + contentType);
+										}
+									}
 								}
 							} else {
 								console.log("Problem: " + "Lightning payment require a connected Lightning wallet.");

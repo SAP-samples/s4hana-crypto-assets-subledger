@@ -218,7 +218,7 @@ app.all("*", function (req, res, next) {
     if (((typeof req) == "object") && ((typeof req.headers) == "object") && ((typeof req.headers['x-forwarded-host']) == "string")) {
         hostname = req.headers['x-forwarded-host'];
     }
-    console.log("req: " + req.method + " " + hostname + req.url);
+    console.log("\n\n=================================\n\nreq: " + req.method + " " + hostname + req.url + "\n\n");
     next();
 
 });

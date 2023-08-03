@@ -32,6 +32,16 @@ module.exports = function(oauth2, client, scope, pCb) {
                 else {
                     responseObj.access_token = data;
                     responseObj.expires_in = oauth2.model.accessToken.ttl;
+
+                    var scopeout = "";
+
+                    scope.forEach(scopeitem => {
+		            	console.log(scopeitem);
+                        scopeout += scopeitem + " "; 
+	            	});
+
+                    responseObj.scope = scopeout.trim();
+
                     oauth2.logger.debug('Access token saved: ', accessTokenValue);
                     cb();
                 }

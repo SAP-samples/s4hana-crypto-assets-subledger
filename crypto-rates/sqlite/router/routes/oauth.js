@@ -82,6 +82,13 @@ module.exports = () => {
 
 	app.post('/token', oauth20.controller.token);
 
+	app.get('/token', function(req, res) { // S/4 HANA like to get the /oauth/token as a connection test
+        var responseStr = "";
+		responseStr += "<!DOCTYPE HTML><html><head><title>Token</title></head><body><h3>Token</h3><br />";
+		responseStr += "</body></html>";
+		res.status(200).send(responseStr);
+	});
+
 	// Define user login routes
 	app.get('/login', function(req, res) {
         var responseStr = "";
@@ -133,22 +140,24 @@ module.exports = () => {
         var inputs = [
             {
                 id: "username",
-                name: "Basic Auth username",
+                name: "Client Id",
                 desc: ".",
                 type: "text",
-                size: 36,
-                default: "client1.id",
+                size: 48,
+                // default: "client1.id",
+                default: "0abbacab-93b6-c0d6-70fe-711b8280fa0c",
                 required: true,
 				disabled: false,
                 header: true
             },
             {
                 id: "password",
-                name: "Basic Auth username",
+                name: "Client Secret",
                 desc: ".",
                 type: "text",
-                size: 36,
-                default: "client1.secret",
+                size: 48,
+                // default: "client1.secret",
+                default: "oYRbgIFYuc5IMLqGWJz3ASU9jwFmtYEepIW5",
                 required: true,
 				disabled: false,
                 header: true

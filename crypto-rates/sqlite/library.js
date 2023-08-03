@@ -63,6 +63,7 @@ function init() {
 	createstr += 'pubkey CHAR(66), ';
 	createstr += 'clientid CHAR(36), ';
 	createstr += 'clientsecret CHAR(48), ';
+	createstr += 'scope CHAR(512) NOT NULL, ';
 	createstr += 'redirectUri CHAR(96), ';
 	createstr += "plan CHAR(1) NOT NULL DEFAULT ('F') REFERENCES planType(type) , ";
 	createstr += 'satoshi INTEGER DEFAULT 1000000 NOT NULL, ';
@@ -81,8 +82,10 @@ function init() {
 	insertstr += 'pubkey, ';
 	insertstr += 'clientid, ';
 	insertstr += 'clientsecret, ';
+	insertstr += 'scope, ';
 	insertstr += 'redirectUri ';
 	insertstr += ') VALUES (';
+	insertstr += '?,';
 	insertstr += '?,';
 	insertstr += '?,';
 	insertstr += '?,';
@@ -94,9 +97,11 @@ function init() {
 
 	stmt = db.prepare(insertstr);
 
-	info = stmt.run("0abbacab-0000-0000-0000-000000000000","client1","","client1.id","client1.secret","http://example.org/oauth2");
+	info = stmt.run("0abbacab-0000-0000-0000-000000000000","client1","0334c29a37fe5d9d5ab8882855c75745f5b5d29cb2c6424fae138a29b248c6cd64","client1.id","client1.secret","uaa.resource","http://example.org/oauth2");
 	console.log(info.changes);
 
+	info = stmt.run("0abbacab-93b6-c0d6-70fe-711b8280fa0c","vacuum8","0334c29a37fe5d9d5ab8882855c75745f5b5d29cb2c6424fae138a29b248c6cd64","0abbacab-93b6-c0d6-70fe-711b8280fa0c","oYRbgIFYuc5IMLqGWJz3ASU9jwFmtYEepIW5","uaa.resource market-data-MRM-MRM_BYOD!b1736.marketdata","http://example.org/oauth2");
+	console.log(info.changes);
 
 	createstr  = 'CREATE TABLE IF NOT EXISTS rates (';
 	createstr += 'tenant CHAR(36) NOT NULL, ';
@@ -114,7 +119,7 @@ function init() {
 	createstr += 'token CHAR(64) NOT NULL, ';
 	createstr += 'userId CHAR(64), ';
 	createstr += 'clientId CHAR(64) NOT NULL, ';
-	createstr += 'scope CHAR(64) NOT NULL, ';
+	createstr += 'scope CHAR(512) NOT NULL, ';
 	createstr += 'ttl INTEGER, ';
 	createstr += 'created DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL';
 	createstr += ')';
@@ -349,7 +354,7 @@ function get_nick_from_pubkey(pubkey) {
 function fetchById(clientid) {
     console.log("fetchById: " + clientid);
 
-	const tenant = db.prepare(`SELECT clientid,nick,clientsecret,redirectUri FROM tenantInfo WHERE clientid = ?`).get(clientid);
+	const tenant = db.prepare(`SELECT clientid,nick,clientsecret,scope,redirectUri FROM tenantInfo WHERE clientid = ?`).get(clientid);
 
 	console.log("tenant: " + JSON.stringify(tenant,null,2));
 
@@ -361,10 +366,11 @@ function fetchByToken(token) {
 
 	const access_token = db.prepare(`SELECT token,userId,clientId,scope,ttl FROM access_token WHERE token = ?`).get(token);
 
-	// Scope isn't valid JSON at times for some reason.  Skip for now
-	// access_token.scope = JSON.parse(access_token.scope);
-
 	if ((access_token) && (typeof access_token == "object")) {
+
+		// Scope isn't valid JSON at times for some reason.  Skip for now
+		access_token.scope = JSON.parse(access_token.scope);
+
 		return access_token;
 	} else {
 		return null;
@@ -390,7 +396,7 @@ function checkSecret(client, secret) {
 function getTenantByID(tenantID) {
     console.log("getTenantByID: " + tenantID);
 
-	const tenant = db.prepare(`SELECT tenant,nick,pubkey,clientid,redirectUri,plan,satoshi FROM tenantInfo WHERE tenant = ?`).get(tenantID);
+	const tenant = db.prepare(`SELECT tenant,nick,pubkey,clientid,scope,redirectUri,plan,satoshi FROM tenantInfo WHERE tenant = ?`).get(tenantID);
 
 	if ((tenant) && (typeof tenant == "object")) {
 
@@ -449,8 +455,9 @@ function tenant_register(tenantID,nick,pubKey) {
 		insertstr += 'pubkey, ';
 		insertstr += 'clientid, ';
 		insertstr += 'clientsecret, ';
+		insertstr += 'scope, ';
 		insertstr += 'redirectUri ';
-			insertstr += ') VALUES (';
+		insertstr += ') VALUES (';
 		insertstr += '?,';
 		insertstr += '?,';
 		insertstr += '?,';
@@ -462,7 +469,7 @@ function tenant_register(tenantID,nick,pubKey) {
 	
 		const stmt = db.prepare(insertstr);
 	
-		stmt.run(tenantID,nick,pubKey,clientid,clientsecret,"http://example.org/oauth2");
+		stmt.run(tenantID,nick,pubKey,clientid,clientsecret,"uaa.resource market-data-MRM-MRM_BYOD!b1736.marketdata","http://example.org/oauth2");
 
 		retobj = 
 		{

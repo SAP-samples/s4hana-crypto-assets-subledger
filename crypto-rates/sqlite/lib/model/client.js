@@ -136,7 +136,16 @@ module.exports.checkScope = function(client, scope) {
      * });
      * return scope;
      */
-    return [];
+
+    console.log("checkScope client: " + client);
+    console.log("checkScope scope: " + scope);
+
+    var matchingScope = [];
+
+    matchingScope = ["uaa.resource", "market-data-MRM-MRM_BYOD!b1736.marketdata"];
+
+    return matchingScope;
+    // return [];
 };
 
 /**

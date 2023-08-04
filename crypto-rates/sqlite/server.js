@@ -202,6 +202,7 @@ app.use(cookieParser());
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.text());
 
 app.use(oauth20.inject());
 
@@ -218,7 +219,7 @@ app.all("*", function (req, res, next) {
     if (((typeof req) == "object") && ((typeof req.headers) == "object") && ((typeof req.headers['x-forwarded-host']) == "string")) {
         hostname = req.headers['x-forwarded-host'];
     }
-    console.log("\n\n=================================\n\nreq: " + req.method + " " + hostname + req.url + "\n\n");
+    console.log("\n\n=================================\n\nreq: " + req.method + " " + hostname + req.url + "\n");
     next();
 
 });

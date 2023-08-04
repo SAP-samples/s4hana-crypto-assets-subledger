@@ -68,7 +68,12 @@ module.exports = () => {
 				{
 					"title": "Info",
 					"path": base_path + "/info"
+				},
+				{
+					"title": "(Right-click on link and Save Link As... SecuritiesIDs.txt)",
+					"path": base_path + "/downloadSupportedSecuritiesIDs"
 				}
+				
 			]
 		}));
 	});
@@ -359,6 +364,45 @@ module.exports = () => {
 
 	});
 	
+	app.get("/downloadSupportedSecuritiesIDs", function (req, res) {
+
+		// Ensure that you have authorizations for transaction TBD2 at the start of the program. To import data via the application server (that is, no PC upload), you need authorizations to access files from ABAP/4 programs.
+
+		// File with the following file format:
+
+		// Name	Type	Length	Example
+		// Instrument name	CHAR	20	=FSAG
+		// Data source/Producer/Source	CHAR	15	QFRecord
+		// Securities price type/no.	CHAR	13	716460
+		// Note:
+		
+		// This file is supplied by the support department of the datafeed provider. All file lines in the file supplied must have this structure. Other file lines are not permitted! Each of the fields must be filled, and the field length must be filled with blank characters if the entry does not fill the field entirely. Tabs are not permitted. The datafeed provider is responsible for the correct structure of this file. You should contact the datafeed provider first if you have problems relating to this report.
+		
+		
+		var responseBody = "";
+
+		var instrumentName = '=FSAG 78901234567890';	// CHAR 20
+		var dataSource     = 'QFRecord 012345'; 		// CHAR 15
+		var securitiesPriceNo = '716460 890123';		// CHAR 13
+
+		responseBody += instrumentName + dataSource + securitiesPriceNo + '\n';
+
+		// Grayscale Bitcoin Trust (BTC) (GBTC) https://finance.yahoo.com/quote/GBTC?p=GBTC&.tsrc=fin-srch
+		// 19.24 As of 03:14PM EDT. 2023-08-04
+		//instrumentName    '12345678901234567890';	// CHAR 20
+		instrumentName    = '=GBTC               ';	// CHAR 20
+		//dataSource        '123456789012345'; 		// CHAR 15
+		dataSource        = 'Yahoo          '; 		// CHAR 15
+		//securitiesPriceNo '1234567890123';		// CHAR 13
+		securitiesPriceNo = '716460       ';		// CHAR 13
+
+		responseBody += instrumentName + dataSource + securitiesPriceNo + '\n';
+
+		console.log("Returning TEXT: \n" + responseBody + "\n");
+		res.setHeader('Content-Type','text/plain');
+		return res.status(200).send(responseBody);
+	});
+
 	var TYPE = process.env['npm_config_type'] || 'memory';
 
 	TYPE = "sqlite";
@@ -396,6 +440,112 @@ module.exports = () => {
 			const contentTypeParts = contentTypeHdr.split(";")
 			
 			const contentType = contentTypeParts[0].trim();
+
+			console.log("Request Content-Type: " + contentType);
+
+			var dataSource = "";
+			var fstKey = "";
+			var secKey = "";
+			var instClass = "";
+			var instProp = "";
+			var instName = "";
+			var fromDate = "";
+			var fromTime = "";
+			var toDate = "";
+			var toTime = "";
+			var reqUser = "";
+
+			if (contentType == "application/json") {
+				console.log("Requesting JSON: " + JSON.stringify(req.body,null, 2));
+			} else {
+				console.log("contentType: " + contentType);
+				if (contentType == "text/plain") {
+					const reqbody = req.body;
+					console.log("Requesting TEXT: ");
+					// console.log(reqbody);
+					var reqLines = reqbody.split("\n");
+					var processing = false;
+					var fieldoff = 0;
+					var fieldlen = 0;
+					reqLines.forEach(line => {
+						// console.log(line);
+						if (line == "</body>") {
+							processing = false;
+						}
+						if (processing) {
+							console.log(line);
+							//0         1         2         3         4         5         6         7         8         9   
+							//0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
+							//EUR~USD:01          BINANCE        CLOSE          0000000000000000000000000000ALUNDE
+
+							fieldoff = 0;
+							fieldlen = 0;
+							// <meta name="TableRow1" content="RINID1    Instrument Name">
+							// <meta name="TableRow1_Length" content="20">
+							fieldoff += fieldlen;
+							fieldlen = 20;
+							instName = line.substring(fieldoff, fieldoff+fieldlen-1).trim();
+							console.log("instName: " + instName);
+							const instParts = instName.split(":");
+							instClass = instParts[1];
+							const keyParts = instParts[0].split("~");
+							fstKey = keyParts[0];
+							secKey = keyParts[1];
+
+							// <meta name="TableRow2" content="RINID2    Data Source">
+							// <meta name="TableRow2_Length" content="15">
+							fieldoff += fieldlen;
+							fieldlen = 15;
+							dataSource = line.substring(fieldoff, fieldoff+fieldlen-1).trim();
+							console.log("dataSource: " + dataSource);
+							// <meta name="TableRow3" content="SPRPTY    Instrument Property">
+							// <meta name="TableRow3_Length" content="15">
+							fieldoff += fieldlen;
+							fieldlen = 15;
+							instProp = line.substring(fieldoff, fieldoff+fieldlen-1).trim();
+							console.log("instProp: " + instProp);
+							// <meta name="TableRow4" content="DFROMDATE Historical Data Start Date">
+							// <meta name="TableRow4_Length" content="8">
+							fieldoff += fieldlen;
+							fieldlen = 8;
+							fromDate = line.substring(fieldoff, fieldoff+fieldlen-1);
+							console.log("fromDate: " + fromDate);
+							// <meta name="TableRow5" content="DFROMTIME Historical Data Start Time">
+							// <meta name="TableRow5_Length" content="6">
+							fieldoff += fieldlen;
+							fieldlen = 6;
+							fromTime = line.substring(fieldoff, fieldoff+fieldlen-1);
+							console.log("fromTime: " + fromTime);
+							// <meta name="TableRow6" content="DTODATE Historical Data End Date">
+							// <meta name="TableRow6_Length" content="8">
+							fieldoff += fieldlen;
+							fieldlen = 8;
+							toDate = line.substring(fieldoff, fieldoff+fieldlen-1);
+							console.log("toDate: " + toDate);
+							// <meta name="TableRow7" content="DTOTIME Historical Data End Time">
+							// <meta name="TableRow7_Length" content="6">
+							fieldoff += fieldlen;
+							fieldlen = 6;
+							toTime = line.substring(fieldoff, fieldoff+fieldlen-1);
+							console.log("toTime: " + toTime);
+							// <meta name="TableRow8" content="UNAME     SAP User Requesting">
+							// <meta name="TableRow8_Length" content="12">
+							fieldoff += fieldlen;
+							fieldlen = 12;
+							reqUser = line.substring(fieldoff, fieldoff+fieldlen-1).trim();
+							console.log("reqUser: " + reqUser);
+
+						}
+						if (line == "<body>") {
+							processing = true;
+						}
+					});
+				
+				} else {
+					console.log("Returning 415 Unexpected Content-Type: " + contentType);
+					return res.status(415).send("Unexpected Content-Type: " + contentType);
+				}
+			}
 
 			if ((tenant) && (typeof tenant == "object")) {
 
@@ -518,18 +668,24 @@ module.exports = () => {
 									// Return the results
 									var responseBody = "";
 
-									responseBody += 'EUR';
+									// responseBody += 'BTC'; // fstKey
+									responseBody += fstKey; 
 									responseBody += '~';
-									responseBody += 'USD';
+									// responseBody += 'USD';
+									responseBody += secKey;
 									responseBody += ':';
-									responseBody += '01';
+									// responseBody += '01';// instClass
+									responseBody += instClass;
 									responseBody += '          ';
 									// responseBody += 'ECB            ';
 									// responseBody += 'ST             ';
-									responseBody += 'BINANCE        ';
-									responseBody += 'CLOSE                                                                                                                     ';
-									responseBody += '20180501';
-									responseBody += '0000001.2310000000';
+									// responseBody += 'BINANCE        ';
+									responseBody += dataSource.padEnd(15, ' ');
+									// responseBody += 'CLOSE                                                                                                                     ';
+									responseBody += instProp.padEnd(122, ' ');; // Pad to 123
+									responseBody += '20230801';
+									responseBody += '000000';
+									responseBody += '9040.23000';
 									responseBody += '                                                      ';
 console.log('EUR~USD:01          ECB            CLO                                                                                                                       201805010000001.2310000000                                                      ');
 console.log(responseBody);
@@ -540,7 +696,7 @@ console.log(responseBody);
 									} else {
 										console.log("contentType: " + contentType);
 										if (contentType == "text/plain") {
-											console.log("Returning TEXT: " + responseBody);
+											console.log("Returning TEXT: \n" + responseBody);
 											return res.status(200).send(responseBody);
 										} else {
 											console.log("Returning 415 Unsupported Content-Type: " + contentType);

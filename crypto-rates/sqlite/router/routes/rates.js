@@ -28,7 +28,7 @@ module.exports = () => {
 
 	//SRV
 	app.get("/", (req, res) => {
-        console.log("served from meter.js");
+        console.log("served from rates.js");
         // console.log(util.inspect(req.hostname, {depth: 1}));
         //console.log(req.headers['x-forwarded-host']);
 		res.setHeader('Content-Type', 'application/json');
@@ -492,6 +492,10 @@ module.exports = () => {
 							fstKey = keyParts[0];
 							secKey = keyParts[1];
 
+							console.log("from: " + fstKey);
+							console.log("  to: " + secKey);
+							console.log("type: " + instClass);
+
 							// <meta name="TableRow2" content="RINID2    Data Source">
 							// <meta name="TableRow2_Length" content="15">
 							fieldoff += fieldlen;
@@ -565,6 +569,9 @@ module.exports = () => {
 
 				const quote = await exchange.getQuote("EUR~USD");
 				console.log(`quote: ${JSON.stringify(quote, null, 2)}`);
+
+				const quoteInMBTC = parseInt(quote) / 1000;
+				console.log(`quoteInMBTC:` + quoteInMBTC);
 				
 				const enddate2 = new Date();
 				const duration2 = enddate2 - enddate;
@@ -595,7 +602,7 @@ module.exports = () => {
 								
 								var pending = false;
 
-								if (false) {
+								if (true) {
 									// Calculate the invoice cost
 
 									// Create the invoice
@@ -669,23 +676,30 @@ module.exports = () => {
 									var responseBody = "";
 
 									// responseBody += 'BTC'; // fstKey
-									responseBody += fstKey; 
-									responseBody += '~';
+									// responseBody += fstKey; 
+									// responseBody += '~';
 									// responseBody += 'USD';
-									responseBody += secKey;
-									responseBody += ':';
+									// responseBody += secKey;
+									// responseBody += ':';
 									// responseBody += '01';// instClass
-									responseBody += instClass;
-									responseBody += '          ';
+									// responseBody += instClass;
+
+									responseBody += (fstKey + '~' + secKey + ':' + instClass).padEnd(20, ' ');
+									// responseBody += '          ';
+
 									// responseBody += 'ECB            ';
 									// responseBody += 'ST             ';
 									// responseBody += 'BINANCE        ';
 									responseBody += dataSource.padEnd(15, ' ');
 									// responseBody += 'CLOSE                                                                                                                     ';
 									responseBody += instProp.padEnd(122, ' ');; // Pad to 123
-									responseBody += '20230801';
-									responseBody += '000000';
-									responseBody += '9040.23000';
+									const d = new Date();
+									// responseBody += '20230801';	// DATE
+									responseBody += (d.getUTCFullYear()).toString(10) + ((d.getUTCMonth()+1).toString(10)).padStart(2,'0')  + ((d.getUTCDate()).toString(10)).padStart(2,'0');
+									// responseBody += '000000';	// TIME
+									responseBody += ((d.getUTCHours()).toString(10)).padStart(2,'0') + ((d.getUTCMinutes()).toString(10)).padStart(2,'0') + ((d.getUTCSeconds()).toString(10)).padStart(2,'0');
+									// responseBody += '28.8406800';	// Milibit (mBTC) is a unit of Bitcoin (BTC) crypto-currency. 1 BTC = 1000 mBTC.
+									responseBody += (quoteInMBTC.toString(10)).padEnd(12, '0');
 									responseBody += '                                                      ';
 console.log('EUR~USD:01          ECB            CLO                                                                                                                       201805010000001.2310000000                                                      ');
 console.log(responseBody);
@@ -833,6 +847,17 @@ console.log(responseBody);
 	});
 
     // https://github.com/WiseLibs/better-sqlite3/blob/HEAD/docs/api.md
+
+	app.get("/getQuoteDebug", async function (req, res) {
+
+		const quote = await exchange.getQuoteDebug("GG00BMTPK874-XAMS");
+		console.log(`quote: ${JSON.stringify(quote, null, 2)}`);
+
+		res.setHeader('Content-Type', 'application/json');
+		res.end(util.inspect(req.headers, {depth: 1}));
+
+	});
+
 
 	return app;
 };
